@@ -79,8 +79,12 @@ Future<Database> openSessionDb({
   String path = 'spinfolk.db',
 }) async {
   final f = factory ?? databaseFactory;
+  // Resolve once: open and rename must agree (a relative name is not cwd).
+  final full = path.startsWith('/') || path == inMemoryDatabasePath
+      ? path
+      : '${await f.getDatabasesPath()}/$path';
   Future<Database> open() => f.openDatabase(
-    path,
+    full,
     options: OpenDatabaseOptions(
       version: sessionDbVersion,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
@@ -105,7 +109,7 @@ Future<Database> openSessionDb({
           // retried at next open
         }
       },
-      // Never wipe on downgrade; AppStarted shows its notice instead.
+      // Never wipe on downgrade; main shows a static notice when open fails.
       onDowngrade: (db, from, to) =>
           throw StateError('database v$from is newer than v$to'),
     ),
@@ -115,9 +119,13 @@ Future<Database> openSessionDb({
   } on DatabaseException catch (e) {
     // Only a corrupt file is reset; transient errors (CANTOPEN, FULL, BUSY)
     // rethrow so history survives. The unreadable file is kept as one backup.
-    // SQLITE_CORRUPT 11, SQLITE_NOTADB 26.
-    if (e.getResultCode() != 11 && e.getResultCode() != 26) rethrow;
-    await File(path).rename('$path.corrupt');
+    // SQLITE_CORRUPT 11, SQLITE_NOTADB 26 (mask off extended codes).
+    final c = (e.getResultCode() ?? 0) & 0xff;
+    if (c != 11 && c != 26) rethrow;
+    for (final x in ['', '-journal', '-wal', '-shm']) {
+      final file = File('$full$x');
+      if (file.existsSync()) await file.rename('$full.corrupt$x');
+    }
     return open();
   }
 }

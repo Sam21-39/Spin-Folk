@@ -35,6 +35,27 @@ void main() {
     expect(ids(cubit.state.games), ['a', 'b', 'c']);
   });
 
+  test(
+    'non-Failure error is contained and the next load still emits',
+    () async {
+      repo.failRaw = true;
+      await cubit.load();
+      expect(cubit.state.failure, isA<StorageFailure>());
+      repo.failRaw = false;
+      await cubit.load();
+      expect(ids(cubit.state.games), ['a', 'b', 'c']);
+      expect(cubit.state.failure, isNull);
+    },
+  );
+
+  test('closed cubit: queued work is skipped', () async {
+    await cubit.load();
+    final f = cubit.delete(['a']);
+    await cubit.close();
+    await f;
+    expect(cubit.isClosed, isTrue);
+  });
+
   test('load failure keeps lists and sets failure', () async {
     await cubit.load();
     repo.failReads = true;

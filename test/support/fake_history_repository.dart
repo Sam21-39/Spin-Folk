@@ -10,6 +10,7 @@ class FakeHistoryRepository implements HistoryRepository {
   final Set<String> deleted = {};
   bool failWrites = false;
   bool failReads = false;
+  bool failRaw = false; // non-Failure error from games()
   final List<String> calls = [];
 
   void add(GameRecord g) => rows.insert(0, g);
@@ -22,6 +23,7 @@ class FakeHistoryRepository implements HistoryRepository {
   @override
   Future<List<GameRecord>> games() async {
     calls.add('games');
+    if (failRaw) throw StateError('boom');
     if (failReads) throw const StorageFailure();
     return [
       for (final g in rows)

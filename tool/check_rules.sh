@@ -25,15 +25,17 @@ src 'Adaptive(App|Scaffold|AlertDialog|SnackBar|BlurView|Button|PopupMenuButton|
 # lib/platform imports adaptive_platform_ui only with an allow-listed `show`.
 allow='IOS26Button|IOS26ButtonStyle|SFSymbol|AdaptiveSwitch|AdaptiveSlider'
 while IFS= read -r f; do
-  imp=$(grep -A1 "^import 'package:adaptive_platform_ui" "$f" | tr '\n' ' ')
-  case "$imp" in
-    *" show "*) ;;
-    *) bad "$f: adaptive_platform_ui import needs a show list"; continue ;;
-  esac
-  for n in $(echo "$imp" | sed -E 's/.* show //; s/;.*//' | tr ',' ' '); do
-    echo "$n" | grep -qE "^($allow)$" || bad "$f: $n not on the adaptive_platform_ui allow-list"
-  done
-done < <(grep -rl --include='*.dart' "^import 'package:adaptive_platform_ui" lib/platform 2>/dev/null)
+  # one line per whole import/export statement (up to the `;`)
+  while IFS= read -r imp; do
+    case "$imp" in
+      *" show "*) ;;
+      *) bad "$f: adaptive_platform_ui import needs a show list"; continue ;;
+    esac
+    for n in $(echo "$imp" | sed -E 's/.* show //; s/;.*//' | tr ',' ' '); do
+      echo "$n" | grep -qE "^($allow)$" || bad "$f: $n not on the adaptive_platform_ui allow-list"
+    done
+  done < <(awk '/^(import|export) .package:adaptive_platform_ui/{p=1} p{printf "%s ", $0} p&&/;/{p=0; print ""}' "$f")
+done < <(grep -rlE --include='*.dart' "^(import|export) .package:adaptive_platform_ui" lib/platform 2>/dev/null)
 
 layers=$(find lib/features -type d \( -name domain -o -name data -o -name bloc -o -name cubit \) 2>/dev/null)
 [ -n "$layers" ] && src 'BuildContext' $layers && bad 'BuildContext in domain/data/bloc/cubit'

@@ -65,12 +65,23 @@ class HistoryCubit extends Cubit<HistoryState> {
   Future<void>? _chain;
 
   Future<void> _serial(Future<void> Function() f) {
-    final r = _chain?.then((_) => f()) ?? f();
+    Future<void> run() async {
+      if (isClosed) return;
+      try {
+        await f();
+      } catch (_) {
+        // Unexpected error: swallow so unawaited callers raise no zone error.
+        if (!isClosed) emit(_next(failure: const StorageFailure()));
+      }
+    }
+
+    final r = _chain?.then((_) => run()) ?? run();
     _chain = r.catchError((_) {});
     return r;
   }
 
   void _arm() {
+    if (isClosed) return;
     _timer?.cancel();
     _timer = Timer(undoWindow, purgeNow);
   }

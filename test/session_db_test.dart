@@ -22,6 +22,27 @@ void main() {
     expect(File('$path.corrupt').existsSync(), isFalse);
   });
 
+  test(
+    'relative name resolves under databases path; sidecars follow',
+    () async {
+      await databaseFactoryFfi.setDatabasesPath(dir.path);
+      final full = '${dir.path}/rel.db';
+      File(full).writeAsBytesSync(List.filled(4096, 7));
+      File('$full-journal').writeAsBytesSync(List.filled(600, 9));
+      final db = await openSessionDb(
+        factory: databaseFactoryFfi,
+        path: 'rel.db',
+      );
+      expect(
+        await db.rawQuery("SELECT name FROM sqlite_master WHERE name = 'game'"),
+        isNotEmpty,
+      );
+      await db.close();
+      expect(File('$full.corrupt').existsSync(), isTrue);
+      expect(File('$full-journal').existsSync(), isFalse);
+    },
+  );
+
   test('corrupt file is renamed and a fresh db opens', () async {
     final path = '${dir.path}/spinfolk.db';
     File(path).writeAsBytesSync(List.filled(4096, 7));
