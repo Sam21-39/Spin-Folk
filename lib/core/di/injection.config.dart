@@ -40,6 +40,7 @@ import 'package:spinfolk/features/settings/presentation/cubit/settings_cubit.dar
 import 'package:spinfolk/features/setup/presentation/cubit/setup_cubit.dart'
     as _i351;
 import 'package:spinfolk/platform/announcer.dart' as _i385;
+import 'package:spinfolk/platform/live_activity_sync.dart' as _i687;
 import 'package:spinfolk/platform/native_bridge.dart' as _i38;
 import 'package:sqflite/sqflite.dart' as _i779;
 
@@ -100,6 +101,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i38.NativeBridge>(),
         gh<_i611.SettingsCubit>(),
       ),
+    );
+    gh.lazySingleton<_i687.LiveActivitySync>(
+      () => _i687.LiveActivitySync(
+        gh<_i986.SessionBloc>(),
+        gh<_i38.NativeBridge>(),
+        gh<_i611.SettingsCubit>(),
+      ),
+      dispose: (i) => i.dispose(),
     );
     return this;
   }

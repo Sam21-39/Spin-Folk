@@ -100,4 +100,38 @@ void main() {
     await cubit.voiceSelected(null);
     expect(cubit.state.voiceLabel, 'Default');
   });
+
+  test('activityStatusChanged emits once; lockScreenOff truth table', () async {
+    final seen = <SettingsState>[];
+    final sub = cubit.stream.listen(seen.add);
+    expect(cubit.state.lockScreenOff, isFalse);
+    for (final s in [
+      ActivityStatus.disabled,
+      ActivityStatus.disabled,
+      ActivityStatus.unsupported,
+      ActivityStatus.error,
+      ActivityStatus.active,
+    ]) {
+      cubit.activityStatusChanged(s);
+    }
+    await pumpEventQueue();
+    await sub.cancel();
+    expect([for (final s in seen) s.lockScreenOff], [true, true, false, false]);
+    expect(seen.length, 4);
+  });
+
+  test('lockScreenNote text per status', () {
+    cubit.activityStatusChanged(ActivityStatus.disabled);
+    expect(
+      cubit.state.lockScreenNote,
+      'Lock Screen updates are off in iOS Settings.',
+    );
+    cubit.activityStatusChanged(ActivityStatus.unsupported);
+    expect(
+      cubit.state.lockScreenNote,
+      "Lock Screen updates aren't available on this device.",
+    );
+    cubit.activityStatusChanged(ActivityStatus.error);
+    expect(cubit.state.lockScreenNote, isNull);
+  });
 }

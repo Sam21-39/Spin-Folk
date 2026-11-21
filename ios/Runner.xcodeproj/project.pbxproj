@@ -7,20 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		122A0D78EEE1BEABA165D5CB /* LiveActivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C78A5702970977723902C900 /* LiveActivityBridge.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		50B051932CC5BCB1397E7924 /* SpinfolkWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 79DFADFF6E5F5B58FEE62DB1 /* SpinfolkWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		65B9B849571E447254439A57 /* SpeechBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72E1137473AC9B91B6BDAC1A /* SpeechBridge.swift */; };
 		7334BE404BB19EEC1912F670 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2D806326BB79B6B6079272 /* PickerView.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		7FEAED88138AFFE97E913787 /* ActionBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55501537B24408D5FE1546E9 /* ActionBarView.swift */; };
+		88EF7F06D094F607FC6EFC32 /* SpinfolkAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C06651FD26CF82424698F61 /* SpinfolkAttributes.swift */; };
+		8B1DE38D196F5FA83B3FADBF /* SpinfolkLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B39F59A15B8B049886A4D08 /* SpinfolkLiveActivity.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		D21382CD202C254A708DBF6A /* Glass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2974F469AAB0E0DEE332F1A /* Glass.swift */; };
 		E96E3E11930A375E868A822E /* NativeChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03D4DF14E2B8026BCD34E0E /* NativeChannel.swift */; };
+		F6A0F154DA288297122B8EF6 /* SpinfolkAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C06651FD26CF82424698F61 /* SpinfolkAttributes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +35,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		CBF0045723D19546FB4BE54C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9FE70E3DA2E6FE85D72AE1F4;
+			remoteInfo = SpinfolkWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -44,6 +56,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9DEAE1E4712FFDF823D60B0 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				50B051932CC5BCB1397E7924 /* SpinfolkWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -53,11 +76,15 @@
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		55501537B24408D5FE1546E9 /* ActionBarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActionBarView.swift; sourceTree = "<group>"; };
+		6B39F59A15B8B049886A4D08 /* SpinfolkLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpinfolkLiveActivity.swift; sourceTree = "<group>"; };
+		6C06651FD26CF82424698F61 /* SpinfolkAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpinfolkAttributes.swift; sourceTree = "<group>"; };
 		72E1137473AC9B91B6BDAC1A /* SpeechBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechBridge.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		78249888A901FFAAB2CA285D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
+		79DFADFF6E5F5B58FEE62DB1 /* SpinfolkWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SpinfolkWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
@@ -68,6 +95,7 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2974F469AAB0E0DEE332F1A /* Glass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Glass.swift; sourceTree = "<group>"; };
 		C03D4DF14E2B8026BCD34E0E /* NativeChannel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeChannel.swift; sourceTree = "<group>"; };
+		C78A5702970977723902C900 /* LiveActivityBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityBridge.swift; sourceTree = "<group>"; };
 		DB2D806326BB79B6B6079272 /* PickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +112,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2871E875B9D04CE986BC910 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +153,7 @@
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				C1434078C535B6C3D73D1D2A /* Frameworks */,
+				BD788E99EBF369E5A2748910 /* SpinfolkWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,6 +162,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				79DFADFF6E5F5B58FEE62DB1 /* SpinfolkWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -155,9 +192,21 @@
 				55501537B24408D5FE1546E9 /* ActionBarView.swift */,
 				C03D4DF14E2B8026BCD34E0E /* NativeChannel.swift */,
 				72E1137473AC9B91B6BDAC1A /* SpeechBridge.swift */,
+				6C06651FD26CF82424698F61 /* SpinfolkAttributes.swift */,
+				C78A5702970977723902C900 /* LiveActivityBridge.swift */,
 			);
 			name = Native;
 			path = Native;
+			sourceTree = "<group>";
+		};
+		BD788E99EBF369E5A2748910 /* SpinfolkWidget */ = {
+			isa = PBXGroup;
+			children = (
+				6B39F59A15B8B049886A4D08 /* SpinfolkLiveActivity.swift */,
+				78249888A901FFAAB2CA285D /* Info.plist */,
+			);
+			name = SpinfolkWidget;
+			path = SpinfolkWidget;
 			sourceTree = "<group>";
 		};
 		C1434078C535B6C3D73D1D2A /* Frameworks */ = {
@@ -197,11 +246,13 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				E9DEAE1E4712FFDF823D60B0 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				65586203F4A03A539FEECEAA /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -210,6 +261,22 @@
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9FE70E3DA2E6FE85D72AE1F4 /* SpinfolkWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 69DDDF5D1E4ED79D593E5A99 /* Build configuration list for PBXNativeTarget "SpinfolkWidget" */;
+			buildPhases = (
+				ED4952DD937945C8585D8F70 /* Sources */,
+				D2871E875B9D04CE986BC910 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SpinfolkWidget;
+			productName = SpinfolkWidget;
+			productReference = 79DFADFF6E5F5B58FEE62DB1 /* SpinfolkWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -249,6 +316,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				9FE70E3DA2E6FE85D72AE1F4 /* SpinfolkWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -329,6 +397,17 @@
 				7FEAED88138AFFE97E913787 /* ActionBarView.swift in Sources */,
 				E96E3E11930A375E868A822E /* NativeChannel.swift in Sources */,
 				65B9B849571E447254439A57 /* SpeechBridge.swift in Sources */,
+				88EF7F06D094F607FC6EFC32 /* SpinfolkAttributes.swift in Sources */,
+				122A0D78EEE1BEABA165D5CB /* LiveActivityBridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED4952DD937945C8585D8F70 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B1DE38D196F5FA83B3FADBF /* SpinfolkLiveActivity.swift in Sources */,
+				F6A0F154DA288297122B8EF6 /* SpinfolkAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +418,12 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		65586203F4A03A539FEECEAA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SpinfolkWidget;
+			target = 9FE70E3DA2E6FE85D72AE1F4 /* SpinfolkWidget */;
+			targetProxy = CBF0045723D19546FB4BE54C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -435,6 +520,32 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Profile;
+		};
+		2743DF5ECB875537C08A0555 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SpinfolkWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = in.appamania.spinfolk.SpinfolkWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		331C8088294A63A400263BE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -639,6 +750,54 @@
 			};
 			name = Release;
 		};
+		B855FF32754CBF38DF67EA36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SpinfolkWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = in.appamania.spinfolk.SpinfolkWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FC752F5A316769ABBAC345FB /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SpinfolkWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = in.appamania.spinfolk.SpinfolkWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -648,6 +807,16 @@
 				331C8088294A63A400263BE5 /* Debug */,
 				331C8089294A63A400263BE5 /* Release */,
 				331C808A294A63A400263BE5 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		69DDDF5D1E4ED79D593E5A99 /* Build configuration list for PBXNativeTarget "SpinfolkWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2743DF5ECB875537C08A0555 /* Debug */,
+				B855FF32754CBF38DF67EA36 /* Release */,
+				FC752F5A316769ABBAC345FB /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

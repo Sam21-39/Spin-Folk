@@ -86,4 +86,64 @@ void main() {
     expect(got, [SpeechEvent.done, SpeechEvent.cancelled, SpeechEvent.error]);
     await sub.cancel();
   });
+
+  test('activity calls send the contract maps', () async {
+    native.install();
+    expect(
+      await bridge.syncActivity({'sessionId': 'x'}),
+      ActivityStatus.active,
+    );
+    await bridge.endActivity('x', 3);
+    await bridge.reconcileActivities(null);
+    await bridge.linksReady();
+    expect(
+      [for (final c in native.calls) c.method],
+      ['activity.sync', 'activity.end', 'activity.reconcile', 'url.ready'],
+    );
+    expect(native.calls[1].arguments, {'sessionId': 'x', 'rounds': 3});
+    expect(native.calls[2].arguments, {'sessionId': null});
+  });
+
+  test('sync status mapping', () async {
+    native.install();
+    for (final s in ['active', 'disabled', 'error']) {
+      native.activityState = s;
+      expect((await bridge.syncActivity({})).name, s);
+    }
+    native.activityState = 'weird';
+    expect(await bridge.syncActivity({}), ActivityStatus.error);
+  });
+
+  test('activity.sync PlatformException -> error', () async {
+    native.install();
+    native.failActivitySync = true;
+    expect(await bridge.syncActivity({}), ActivityStatus.error);
+  });
+
+  test('activity: no handler -> unsupported, never throws', () async {
+    expect(await bridge.syncActivity({}), ActivityStatus.unsupported);
+    await bridge.endActivity('x', 1);
+    await bridge.reconcileActivities('x');
+    await bridge.linksReady();
+  });
+
+  test('url.open: only valid ids reach the stream', () async {
+    native.install();
+    final got = <String>[];
+    final sub = bridge.sessionLinks.listen(got.add);
+    final ok = 'a1' * 16;
+    for (final arg in <Object?>[
+      {'sessionId': ok},
+      {'sessionId': ok.toUpperCase()},
+      {'sessionId': 'a' * 31},
+      {'sessionId': '../' * 11},
+      <String, Object?>{},
+      'nope',
+    ]) {
+      await native.send('url.open', arg);
+    }
+    await pumpEventQueue();
+    await sub.cancel();
+    expect(got, [ok]);
+  });
 }

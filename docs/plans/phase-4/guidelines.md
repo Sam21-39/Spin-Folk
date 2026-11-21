@@ -822,7 +822,7 @@ Real `SessionBloc` on `FakeSessionRepository` with `Random(1)`, real `NativeBrid
 - Same with `AppBackgrounded` instead of the finished event → one sync.
 - `ModeChosen` → sync with `mode`. Next round → sync with the round number raised (and last-round roles, per 2b's state). `ReplayRequested` and a failed write → no call.
 - Players edited → sync with the new `players`.
-- End → `activity.end {sessionId: 'test', rounds: <round>}`, and no sync after it.
+- End → `activity.end {sessionId: 'test', rounds: <log.length>}`, and no sync after it.
 - Session id changes without a gap (if 2b allows it) → `activity.end` for the old id, then `activity.sync` for the new one, in that order.
 - Stored session at launch → `activity.reconcile {sessionId: 'test'}` then `activity.sync`.
 - `foreground()` again → another reconcile + sync even though the payload is unchanged; while spinning → reconcile only.

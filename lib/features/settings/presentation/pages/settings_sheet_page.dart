@@ -78,6 +78,18 @@ class SettingsSheetPage extends StatelessWidget {
                         ),
                       ],
                     ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      buildWhen: (a, b) => a.lockScreenNote != b.lockScreenNote,
+                      builder: (context, s) => s.lockScreenNote == null
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                              child: Text(
+                                s.lockScreenNote!,
+                                style: Tokens.footnote,
+                              ),
+                            ),
+                    ),
                   ],
                 ),
               ),

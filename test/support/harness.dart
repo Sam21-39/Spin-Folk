@@ -19,6 +19,7 @@ import 'package:spinfolk/features/settings/domain/prefs_repository.dart';
 import 'package:spinfolk/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:spinfolk/features/setup/presentation/cubit/setup_cubit.dart';
 import 'package:spinfolk/platform/announcer.dart';
+import 'package:spinfolk/platform/live_activity_sync.dart';
 import 'package:spinfolk/platform/native_bridge.dart';
 import 'package:spinfolk/platform/native_action_bar.dart';
 
@@ -60,6 +61,7 @@ Future<FakeSessionRepository> pumpApp(
   final bridge = NativeBridge();
   final settings = SettingsCubit(prefsRepo, bridge);
   final announcer = Announcer(bloc, bridge, settings)..start();
+  final activity = LiveActivitySync(bloc, bridge, settings);
   getIt
     ..registerSingleton<HistoryRepository>(historyRepo)
     ..registerSingleton<HistoryCubit>(cubit)
@@ -68,10 +70,12 @@ Future<FakeSessionRepository> pumpApp(
     ..registerSingleton<NativeBridge>(bridge)
     ..registerSingleton<SettingsCubit>(settings)
     ..registerSingleton<Announcer>(announcer)
+    ..registerSingleton<LiveActivitySync>(activity)
     ..registerSingleton<GoRouter>(buildRouter(bloc))
     ..registerSingleton<AppNavigator>(AppNavigator(getIt<GoRouter>()))
     ..registerFactory<SetupCubit>(SetupCubit.new);
   addTearDown(() async {
+    await activity.dispose();
     await announcer.close();
     await settings.close();
     await bridge.dispose();
@@ -84,6 +88,7 @@ Future<FakeSessionRepository> pumpApp(
   bloc.add(const AppStarted());
   await cubit.load();
   await tester.pump();
+  activity.start(); // as main does, after the first non-loading state
   await tester.pumpWidget(const SpinfolkApp());
   await tester.pumpAndSettle();
   return repo;

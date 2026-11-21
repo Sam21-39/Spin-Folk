@@ -14,6 +14,7 @@ final class SettingsState {
     this.voices = const [],
     this.voiceListOpen = false,
     this.failure,
+    this.activityStatus,
   });
 
   final Prefs prefs;
@@ -24,6 +25,21 @@ final class SettingsState {
 
   /// Last save failed; shown inline in the sheet.
   final Failure? failure;
+
+  /// Last Live Activity result; null until the first sync.
+  final ActivityStatus? activityStatus;
+
+  bool get lockScreenOff =>
+      activityStatus == ActivityStatus.disabled ||
+      activityStatus == ActivityStatus.unsupported;
+
+  /// The sheet line for [lockScreenOff]; null otherwise.
+  String? get lockScreenNote => switch (activityStatus) {
+    ActivityStatus.disabled => 'Lock Screen updates are off in iOS Settings.',
+    ActivityStatus.unsupported =>
+      "Lock Screen updates aren't available on this device.",
+    _ => null,
+  };
 
   /// "Default" when voiceId is null or not installed any more.
   String get voiceLabel {
@@ -39,6 +55,7 @@ final class SettingsState {
         other.prefs != prefs ||
         other.voiceListOpen != voiceListOpen ||
         other.failure != failure ||
+        other.activityStatus != activityStatus ||
         other.voices.length != voices.length) {
       return false;
     }
@@ -49,8 +66,13 @@ final class SettingsState {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(prefs, voiceListOpen, failure, Object.hashAll(voices));
+  int get hashCode => Object.hash(
+    prefs,
+    voiceListOpen,
+    failure,
+    activityStatus,
+    Object.hashAll(voices),
+  );
 }
 
 @lazySingleton
@@ -63,7 +85,13 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   /// Sheet is opening: refresh the installed-voice list.
   Future<void> opened() async {
-    emit(SettingsState(prefs: state.prefs, voices: state.voices));
+    emit(
+      SettingsState(
+        prefs: state.prefs,
+        voices: state.voices,
+        activityStatus: state.activityStatus,
+      ),
+    );
     final voices = sortVoices(
       await _bridge.voices(PlatformDispatcher.instance.locale.languageCode),
     );
@@ -74,11 +102,25 @@ class SettingsCubit extends Cubit<SettingsState> {
         voices: voices,
         voiceListOpen: state.voiceListOpen,
         failure: state.failure,
+        activityStatus: state.activityStatus,
       ),
     );
   }
 
   Future<void> announceToggled(bool on) => _save(state.prefs.withAnnounce(on));
+
+  void activityStatusChanged(ActivityStatus status) {
+    if (status == state.activityStatus) return;
+    emit(
+      SettingsState(
+        prefs: state.prefs,
+        voices: state.voices,
+        voiceListOpen: state.voiceListOpen,
+        failure: state.failure,
+        activityStatus: status,
+      ),
+    );
+  }
 
   void voiceRowTapped() => emit(
     SettingsState(
@@ -86,6 +128,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       voices: state.voices,
       voiceListOpen: !state.voiceListOpen,
       failure: state.failure,
+      activityStatus: state.activityStatus,
     ),
   );
 
@@ -100,6 +143,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       voices: state.voices,
       voiceListOpen: state.voiceListOpen,
       failure: state.failure,
+      activityStatus: state.activityStatus,
     ),
   );
 
@@ -108,7 +152,14 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> _save(Prefs next, {bool closeList = false}) async {
     final open = closeList ? false : state.voiceListOpen;
-    emit(SettingsState(prefs: next, voices: state.voices, voiceListOpen: open));
+    emit(
+      SettingsState(
+        prefs: next,
+        voices: state.voices,
+        voiceListOpen: open,
+        activityStatus: state.activityStatus,
+      ),
+    );
     try {
       await _repo.save(next);
     } on Failure catch (f) {
@@ -118,6 +169,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           voices: state.voices,
           voiceListOpen: state.voiceListOpen,
           failure: f,
+          activityStatus: state.activityStatus,
         ),
       );
     }

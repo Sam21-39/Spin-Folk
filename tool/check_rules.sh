@@ -49,6 +49,7 @@ pres=$(find lib/features -type d -name presentation 2>/dev/null)
 grep -q 'flutter_tts' pubspec.yaml && bad 'flutter_tts is banned; speech is native (spinfolk/native)'
 grep -qE 'NSMicrophoneUsageDescription|UIBackgroundModes' ios/Runner/Info.plist \
   && bad 'no microphone permission and no background modes'
+grep -q 'DEVELOPMENT_TEAM' ios/Runner.xcodeproj/project.pbxproj && bad 'no team id in the repo'
 
 [ "$fail" -eq 0 ] && echo 'check_rules: OK'
 exit "$fail"
