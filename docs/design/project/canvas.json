@@ -1,0 +1,201 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-21T18:55:00Z"
+ },
+ "title": "Spinfolk \u2014 Design System",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [
+  {
+   "id": "system",
+   "name": "Design system"
+  },
+  {
+   "id": "screens",
+   "name": "Screens"
+  },
+  {
+   "id": "brand",
+   "name": "Logo & Live Activity"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 2620,
+   "title": "Foundations",
+   "page": "system"
+  },
+  "Components.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1900,
+   "title": "Components",
+   "page": "system"
+  },
+  "Dial.dc.html": {
+   "x": 1520,
+   "y": 2020,
+   "w": 1440,
+   "h": 1060,
+   "title": "Dial & bottle",
+   "page": "system"
+  },
+  "NewGame.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "New Game",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "AddNames.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Add Names",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Resume.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Resume",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Ready.dc.html": {
+   "x": 0,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Ready",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Spinning.dc.html": {
+   "x": 470,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Spinning",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Revealed.dc.html": {
+   "x": 940,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Revealed",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Challenge.dc.html": {
+   "x": 1410,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Challenge",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Crowd60.dc.html": {
+   "x": 1880,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 60 players, long names",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Settings.dc.html": {
+   "x": 0,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Session sheet",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "EndConfirm.dc.html": {
+   "x": 470,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "End confirmation",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Logo.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1220,
+   "title": "Logo",
+   "page": "brand"
+  },
+  "LiveActivity.dc.html": {
+   "x": 0,
+   "y": 1340,
+   "w": 1440,
+   "h": 1200,
+   "title": "Live Activity & Dynamic Island",
+   "page": "brand"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Components.dc.html",
+  "Dial.dc.html",
+  "NewGame.dc.html",
+  "AddNames.dc.html",
+  "Resume.dc.html",
+  "Ready.dc.html",
+  "Spinning.dc.html",
+  "Revealed.dc.html",
+  "Challenge.dc.html",
+  "Crowd60.dc.html",
+  "Settings.dc.html",
+  "EndConfirm.dc.html",
+  "Logo.dc.html",
+  "LiveActivity.dc.html"
+ ],
+ "notes": {
+  "title-0": {
+   "x": 0,
+   "y": -300,
+   "text": "Setup",
+   "kind": "title1",
+   "maxW": 1330,
+   "page": "screens"
+  },
+  "title-1": {
+   "x": 0,
+   "y": 964,
+   "text": "Game loop",
+   "kind": "title1",
+   "maxW": 2270,
+   "page": "screens"
+  },
+  "title-2": {
+   "x": 0,
+   "y": 2228,
+   "text": "Session",
+   "kind": "title1",
+   "maxW": 860,
+   "page": "screens"
+  }
+ },
+ "designSystems": []
+}
