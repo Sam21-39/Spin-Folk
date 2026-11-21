@@ -1,14 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:spinfolk/app/app.dart';
-import 'package:spinfolk/core/di/injection.dart';
+import 'package:spinfolk/features/session/domain/entities/session.dart';
+
+import 'support/harness.dart';
 
 void main() {
-  tearDown(getIt.reset);
+  testWidgets('nothing stored -> New Game', (tester) async {
+    await pumpApp(tester);
+    expect(find.text('New Game'), findsOneWidget);
+  });
 
-  testWidgets('app boots to baseline page', (tester) async {
-    configureDependencies();
-    await tester.pumpWidget(const SpinfolkApp());
-    await tester.pumpAndSettle();
-    expect(find.text('Players: 8'), findsOneWidget);
+  testWidgets('stored session -> Resume', (tester) async {
+    await pumpApp(
+      tester,
+      stored: Session(
+        id: 'test',
+        startedAtMs: 0,
+        players: [for (var i = 0; i < 4; i++) Player(seat: i)],
+      ),
+    );
+    expect(find.text('SESSION IN PROGRESS'), findsOneWidget);
   });
 }
