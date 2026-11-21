@@ -157,6 +157,10 @@ Deferred to the post-Phase-5 device pass (flows written now, **NOT VERIFIED** in
 - P3-D6 Audible line with the mute switch on; other audio ducks and comes back; an interruption shows the notice; voices listed match iOS Settings. (Real device.)
 - P3-D7 Sheet with the adaptive switch and slider scrolls and dismisses cleanly; controls respond on the first touch.
 
+### Deferred device checks (additions to §7 P3-D6 / P3-D7)
+- P3-D7 also: verify VoiceOver reads Announcements label + native switch as one element; else excludeSemantics on label row.
+- P3-D6 also: confirm other audio unducks immediately on background.
+
 ## 8. Risks
 
 | Risk | Likelihood | Handling |

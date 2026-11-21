@@ -46,5 +46,9 @@ domain=$(find lib/features -type d -name domain 2>/dev/null)
 pres=$(find lib/features -type d -name presentation 2>/dev/null)
 [ -n "$pres" ] && src "^import .*/data/" $pres && bad 'presentation must not import data'
 
+grep -q 'flutter_tts' pubspec.yaml && bad 'flutter_tts is banned; speech is native (spinfolk/native)'
+grep -qE 'NSMicrophoneUsageDescription|UIBackgroundModes' ios/Runner/Info.plist \
+  && bad 'no microphone permission and no background modes'
+
 [ "$fail" -eq 0 ] && echo 'check_rules: OK'
 exit "$fail"

@@ -6,12 +6,14 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../app/app_navigator.dart';
 import '../../../../app/tokens.dart';
 import '../../../../app/ui.dart';
+import '../../../../platform/announcer.dart';
 import '../../../../platform/glass_button.dart';
 import '../../../../platform/native_action_bar.dart';
 import '../../../session/domain/entities/session.dart';
 import '../../../history/domain/rules/history_labels.dart';
 import '../../../session/domain/rules/labels.dart';
 import '../../../session/presentation/bloc/session_bloc.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../widgets/role_cards.dart';
 import '../widgets/spin_stage.dart';
 
@@ -275,7 +277,7 @@ class _Game extends StatelessWidget {
         children: [
           RoleCards(session: session),
           const SizedBox(height: Tokens.s12),
-          _quote(),
+          _AnnounceRow(session),
         ],
       );
     } else {
@@ -283,7 +285,7 @@ class _Game extends StatelessWidget {
         children: [
           _challengeCard(o),
           const SizedBox(height: Tokens.s12),
-          _quote(),
+          _AnnounceRow(session),
         ],
       );
     }
@@ -298,16 +300,6 @@ class _Game extends StatelessWidget {
       ],
     );
   }
-
-  Widget _quote() => Text(
-    '“${speechLine(session)}”',
-    textAlign: TextAlign.center,
-    style: const TextStyle(
-      color: Tokens.textSecondary,
-      fontSize: 14,
-      height: 19 / 14,
-    ),
-  );
 
   /// Ready panel: flick hint, then the "LAST" card (or the legend, no rounds).
   Widget _ready(BuildContext context) {
@@ -568,7 +560,10 @@ class _SettingsButton extends StatelessWidget {
     label: 'Session and settings',
     symbol: 'ellipsis',
     flat: covered,
-    onPressed: context.read<AppNavigator>().settings,
+    onPressed: () {
+      context.read<SettingsCubit>().opened();
+      context.read<AppNavigator>().settings();
+    },
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -586,4 +581,112 @@ class _SettingsButton extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Quoted announcement line + Replay; the voice notice replaces both.
+class _AnnounceRow extends StatelessWidget {
+  const _AnnounceRow(this.session);
+  final Session session;
+
+  @override
+  Widget build(BuildContext context) => BlocBuilder<Announcer, bool>(
+    builder: (context, unavailable) {
+      if (unavailable) return const NoticeBanner(Announcer.unavailableText);
+      return Row(
+        children: [
+          const ExcludeSemantics(
+            child: SizedBox.square(
+              dimension: 18,
+              child: CustomPaint(painter: _SpeakerPainter()),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '“${speechLine(session)}”',
+              style: const TextStyle(
+                color: Tokens.textSecondary,
+                fontSize: 14,
+                height: 19 / 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Semantics(
+            button: true,
+            label: 'Replay announcement',
+            excludeSemantics: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () =>
+                  context.read<SessionBloc>().add(const ReplayRequested()),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: Tokens.touch),
+                alignment: Alignment.center,
+                child: Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  alignment: Alignment.center,
+                  decoration: ShapeDecoration(
+                    color: Tokens.bgRaised,
+                    shape: const StadiumBorder(
+                      side: BorderSide(color: Tokens.line),
+                    ),
+                  ),
+                  child: Text(
+                    'Replay',
+                    style: const TextStyle(
+                      color: Tokens.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textScaler: besideIsland(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// Speaker glyph from the Revealed artboard (24-unit box, stroke 2).
+class _SpeakerPainter extends CustomPainter {
+  const _SpeakerPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(size.width / 24, size.height / 24);
+    final p = Paint()
+      ..color = Tokens.textSecondary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+    canvas
+      ..drawPath(
+        Path()
+          ..moveTo(4, 9)
+          ..lineTo(8, 9)
+          ..lineTo(13, 5)
+          ..lineTo(13, 19)
+          ..lineTo(8, 15)
+          ..lineTo(4, 15)
+          ..close(),
+        p,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(16.5, 8.5)
+          ..cubicTo(18, 10, 18, 14, 16.5, 15.5)
+          ..moveTo(19, 6)
+          ..cubicTo(22, 9, 22, 15, 19, 18),
+        p,
+      );
+  }
+
+  @override
+  bool shouldRepaint(_SpeakerPainter old) => false;
 }

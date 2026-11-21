@@ -49,6 +49,7 @@ final class SessionActive extends SessionState {
     this.orientation = 0,
     this.failure,
     this.replayCount = 0,
+    this.liveReveal = false,
   });
 
   final Session session;
@@ -64,6 +65,11 @@ final class SessionActive extends SessionState {
   /// Bumped by ReplayRequested; Phase 3's Announcer watches it.
   final int replayCount;
 
+  /// True only in the state emitted for SpinAnimationFinished: the reveal
+  /// happened live on screen. Backgrounded and restored reveals leave it false,
+  /// so the Announcer stays silent for them.
+  final bool liveReveal;
+
   @override
   bool operator ==(Object other) =>
       other is SessionActive &&
@@ -72,7 +78,8 @@ final class SessionActive extends SessionState {
       other.spinPlan == spinPlan &&
       other.orientation == orientation &&
       other.failure == failure &&
-      other.replayCount == replayCount;
+      other.replayCount == replayCount &&
+      other.liveReveal == liveReveal;
 
   @override
   int get hashCode => Object.hash(
@@ -82,6 +89,7 @@ final class SessionActive extends SessionState {
     orientation,
     failure,
     replayCount,
+    liveReveal,
   );
 }
 

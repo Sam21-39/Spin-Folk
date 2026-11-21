@@ -6,6 +6,9 @@ import 'package:spinfolk/features/session/domain/entities/game_record.dart';
 import 'package:spinfolk/features/session/domain/entities/session.dart';
 import 'package:spinfolk/features/setup/presentation/cubit/setup_cubit.dart';
 
+import 'package:spinfolk/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:spinfolk/platform/announcer.dart';
+
 import 'support/harness.dart';
 
 final _long = 'W' * 40;
@@ -206,6 +209,54 @@ void main() {
         await tester.pumpAndSettle();
         read<AppNavigator>(tester).settings();
       });
+    });
+
+    testWidgets(
+      'Voice sheet with a long voice list, Replay row, notice ($tag)',
+      (tester) async {
+        await visit(tester, 'revealed', session(8, Phase.revealed), () async {
+          await tapBar(tester, 'resume');
+        });
+        expect(find.text('Replay'), findsOneWidget);
+        await visit(tester, 'challenge', session(8, Phase.challenge), () async {
+          await tapBar(tester, 'resume');
+        });
+        expect(find.text('Replay'), findsOneWidget);
+
+        native.voices = [
+          for (var i = 0; i < 12; i++)
+            {
+              'id': 'v$i',
+              'name': i == 0 ? _long : 'Voice $i',
+              'language': 'en-US',
+              'quality': i.isEven ? 'enhanced' : 'default',
+            },
+        ];
+        await read<SettingsCubit>(tester).opened();
+        read<SettingsCubit>(tester).voiceRowTapped();
+        read<AppNavigator>(tester).settings();
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: 'voice sheet');
+        await read<SettingsCubit>(tester).voiceSelected('v0');
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: 'long voice name');
+      },
+    );
+
+    testWidgets('Revealed with the voice notice ($tag)', (tester) async {
+      await pumpApp(
+        tester,
+        stored: session(8, Phase.ready),
+        size: size,
+        textScale: scale,
+      );
+      native.failSpeak = true;
+      await tapBar(tester, 'resume');
+      await tester.pumpAndSettle();
+      await tapBar(tester, 'spin');
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      expect(find.text(Announcer.unavailableText), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('Summary ($tag)', (tester) async {

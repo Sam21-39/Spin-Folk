@@ -1,0 +1,23 @@
+# DEFERRED: run in the post-Phase-5 device pass. Not executed in Phase 3.
+appId: in.appamania.spinfolk
+---
+- launchApp: { clearState: true }
+- tapOn: "New game"
+- tapOn: "Start session"
+- assertVisible: "Round 1 · .* players"
+- tapOn: "Session and settings"
+- assertVisible: "Announcements"
+- assertVisible: "Play sample"
+- tapOn: "Announcements" # switch off
+- takeScreenshot: docs/plans/phase-3/evidence/p3-sheet-voice
+- tapOn: "Done"
+- tapOn: "Spin"
+- stopApp # kill mid-spin (P3-D2)
+- launchApp
+- tapOn: "Resume game"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 5000 }
+- assertVisible: "Replay announcement"
+- takeScreenshot: docs/plans/phase-3/evidence/p3-resume-after-kill
+- tapOn: "Session and settings"
+- takeScreenshot: docs/plans/phase-3/evidence/p3-prefs-after-kill # switch must still be off (P3-D1)
+- tapOn: "Done"

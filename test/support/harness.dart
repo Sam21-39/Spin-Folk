@@ -14,11 +14,22 @@ import 'package:spinfolk/features/history/presentation/cubit/history_cubit.dart'
 import 'package:spinfolk/features/session/domain/entities/game_record.dart';
 import 'package:spinfolk/features/session/domain/entities/session.dart';
 import 'package:spinfolk/features/session/presentation/bloc/session_bloc.dart';
+import 'package:spinfolk/features/settings/domain/prefs.dart';
+import 'package:spinfolk/features/settings/domain/prefs_repository.dart';
+import 'package:spinfolk/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:spinfolk/features/setup/presentation/cubit/setup_cubit.dart';
+import 'package:spinfolk/platform/announcer.dart';
+import 'package:spinfolk/platform/native_bridge.dart';
 import 'package:spinfolk/platform/native_action_bar.dart';
 
 import 'fake_history_repository.dart';
+import 'fake_native.dart';
+import 'fake_prefs_repository.dart';
 import 'fake_session_repository.dart';
+
+/// The fakes of the latest pumpApp, for assertions.
+late FakeNative native;
+late FakePrefsRepository prefsRepo;
 
 /// Registers a SessionBloc on a fake repository, the real router and
 /// navigator, then pumps SpinfolkApp. Returns the fake.
@@ -29,6 +40,7 @@ Future<FakeSessionRepository> pumpApp(
   Size size = const Size(390, 844),
   double textScale = 1,
   List<GameRecord> history = const [],
+  Prefs prefs = const Prefs(),
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
@@ -42,14 +54,28 @@ Future<FakeSessionRepository> pumpApp(
   final repo = FakeSessionRepository(historyRepo)..stored = stored;
   final bloc = SessionBloc(repo, Random(seed));
   final cubit = HistoryCubit(historyRepo);
+  // Without the mock every reveal would show the voice notice.
+  native = FakeNative()..install();
+  prefsRepo = FakePrefsRepository()..stored = prefs;
+  final bridge = NativeBridge();
+  final settings = SettingsCubit(prefsRepo, bridge);
+  final announcer = Announcer(bloc, bridge, settings)..start();
   getIt
     ..registerSingleton<HistoryRepository>(historyRepo)
     ..registerSingleton<HistoryCubit>(cubit)
     ..registerSingleton<SessionBloc>(bloc)
+    ..registerSingleton<PrefsRepository>(prefsRepo)
+    ..registerSingleton<NativeBridge>(bridge)
+    ..registerSingleton<SettingsCubit>(settings)
+    ..registerSingleton<Announcer>(announcer)
     ..registerSingleton<GoRouter>(buildRouter(bloc))
     ..registerSingleton<AppNavigator>(AppNavigator(getIt<GoRouter>()))
     ..registerFactory<SetupCubit>(SetupCubit.new);
   addTearDown(() async {
+    await announcer.close();
+    await settings.close();
+    await bridge.dispose();
+    native.uninstall();
     await bloc.close();
     await cubit.close();
     await getIt.reset();

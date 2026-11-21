@@ -37,7 +37,8 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         s is ResumePrompt && s.session.id == id ? _resume(s, emit) : _noop(),
       SessionStarted(:final count, :final names) => _start(count, names, emit),
       SpinRequested() => _spin(emit),
-      SpinAnimationFinished() || AppBackgrounded() => _finishSpin(emit),
+      SpinAnimationFinished() => _finishSpin(emit, live: true),
+      AppBackgrounded() => _finishSpin(emit, live: false),
       ModeChosen(:final mode) => _persist(
         emit,
         (a) => a.session.phase == Phase.revealed,
@@ -160,7 +161,10 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     }
   }
 
-  Future<void> _finishSpin(Emitter<SessionState> emit) async {
+  Future<void> _finishSpin(
+    Emitter<SessionState> emit, {
+    required bool live,
+  }) async {
     final a = state;
     final plan = a is SessionActive ? a.spinPlan : null;
     if (a is! SessionActive || !a.spinning || plan == null) return;
@@ -169,6 +173,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         session: a.session,
         orientation: seatAngle(a.session.outcome!.taker, a.session.playerCount),
         replayCount: a.replayCount,
+        liveReveal: live,
       ),
     );
   }

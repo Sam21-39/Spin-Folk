@@ -14,6 +14,7 @@ import UIKit
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     let registrar = engineBridge.applicationRegistrar
     let messenger = registrar.messenger()
+    NativeChannel.shared.attach(messenger: messenger)
     registrar.register(PickerFactory(messenger: messenger), withId: "spinfolk/picker")
     registrar.register(ActionBarFactory(messenger: messenger), withId: "spinfolk/actionbar")
   }
