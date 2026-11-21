@@ -1,16 +1,19 @@
+# DEFERRED (owner decision): not run in Phase 2b. Run when all phases are done.
 appId: in.appamania.spinfolk
 # Run with: maestro test -e N=<players> tool/maestro/loop.yaml
 ---
 - launchApp
-- assertVisible: "New Game"
-- tapOn: "Start Session"
+- assertVisible: "Spinfolk"
+- tapOn: "New game"
+- assertVisible: "New game"
+- tapOn: "Start session"
 - assertVisible: "Round 1 · ${N} players"
 - assertVisible: "Dial, ${N} players, ready to spin"
 - tapOn: "Spin"
 - assertVisible: "Spinning…"
 - extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
 - waitForAnimationToEnd
-- takeScreenshot: docs/plans/phase-2/evidence/p2-loop-n${N}-revealed
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-loop-n${N}-revealed
 - tapOn: "Truth"
 - scrollUntilVisible: { element: ".*a question, out loud\\." }
 - assertVisible: ".*a question, out loud\\."
@@ -29,17 +32,20 @@ appId: in.appamania.spinfolk
 - assertVisible: "Round 4 · ${N} players"
 - stopApp
 - launchApp
-- assertVisible: "Resume Session"
+- assertVisible: "Resume game"
 - scrollUntilVisible: { element: "Round 4 · ${N} players" }
 - assertVisible: "Round 4 · ${N} players"
-- tapOn: "Resume Session"
+- tapOn: "Resume game"
 - assertVisible: "Dial, ${N} players, ready to spin"
 - tapOn: "Session and settings"
 - extendedWaitUntil: { visible: "Edit Players", timeout: 5000 }
 - waitForAnimationToEnd
-- takeScreenshot: docs/plans/phase-2/evidence/p2-loop-n${N}-sheet
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-loop-n${N}-sheet
 - scrollUntilVisible: { element: "End Session" }
 - tapOn: "End Session"
 - extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
 - tapOn: "End Session"
-- assertVisible: "New Game"
+- assertVisible: "Good game."
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-loop-n${N}-summary
+- tapOn: "Done"
+- assertVisible: "New game"

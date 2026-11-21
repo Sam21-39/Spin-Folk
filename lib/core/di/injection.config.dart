@@ -18,6 +18,12 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:spinfolk/app/app_navigator.dart' as _i854;
 import 'package:spinfolk/app/router.dart' as _i1010;
 import 'package:spinfolk/core/di/injection.dart' as _i864;
+import 'package:spinfolk/features/history/data/history_repository_impl.dart'
+    as _i692;
+import 'package:spinfolk/features/history/domain/history_repository.dart'
+    as _i67;
+import 'package:spinfolk/features/history/presentation/cubit/history_cubit.dart'
+    as _i295;
 import 'package:spinfolk/features/session/data/session_repository_impl.dart'
     as _i818;
 import 'package:spinfolk/features/session/domain/session_repository.dart'
@@ -50,8 +56,14 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i986.SessionBloc(gh<_i555.SessionRepository>(), gh<_i407.Random>()),
     );
+    gh.lazySingleton<_i67.HistoryRepository>(
+      () => _i692.HistoryRepositoryImpl(gh<_i779.Database>()),
+    );
     gh.lazySingleton<_i583.GoRouter>(
       () => routerModule.router(gh<_i986.SessionBloc>()),
+    );
+    gh.lazySingleton<_i295.HistoryCubit>(
+      () => _i295.HistoryCubit(gh<_i67.HistoryRepository>()),
     );
     gh.lazySingleton<_i854.AppNavigator>(
       () => _i854.AppNavigator(gh<_i583.GoRouter>()),

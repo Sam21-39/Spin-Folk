@@ -1,18 +1,20 @@
+# DEFERRED (owner decision): not run in Phase 2b. Run when all phases are done.
 appId: in.appamania.spinfolk
 ---
 - launchApp
-- assertVisible: "New Game"
-- tapOn: "Start Session"
+- assertVisible: "Spinfolk"
+- tapOn: "New game"
+- tapOn: "Start session"
 - assertVisible: "Round 1 · 8 players"
 - tapOn: "Session and settings"
 - tapOn: "Edit Players"
-- assertVisible: "How many players?"
+- assertVisible: "How many in the circle?"
 - swipe: { start: "50%, 34%", end: "50%, 26%" }
-- tapOn: "Add Names.*"
+- tapOn: "Add names.*"
 - tapOn: { point: "50%,23%" }
 - inputText: "Riya"
 - tapOn: "Done"
 - tapOn: "Save Players"
 - assertNotVisible: "Round 1 · 8 players"
 - assertVisible: "Round 1 · .* players"
-- takeScreenshot: docs/plans/phase-2/evidence/p2-edit
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-edit

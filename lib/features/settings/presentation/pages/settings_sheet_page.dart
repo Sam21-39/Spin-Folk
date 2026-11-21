@@ -21,107 +21,63 @@ class SettingsSheetPage extends StatelessWidget {
         final session = st.session;
         final named = session.players.where((p) => p.name != null).length;
         final canEdit = session.phase == Phase.ready && !st.spinning;
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(context).height - 54,
-              maxWidth: Tokens.maxContentWidth,
-            ),
-            child: Material(
-              color: Tokens.bgSheet,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
-                side: BorderSide(color: Tokens.line),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 5,
-                          decoration: BoxDecoration(
-                            color: Tokens.line,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
+        return SheetFrame(
+          title: 'Session',
+          onDone: nav.game,
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _Label('PLAYERS'),
+                    _Card(
+                      children: [
+                        _Row(
+                          text: named == 0
+                              ? '${session.playerCount} players'
+                              : '${session.playerCount} players · $named named',
                         ),
-                      ),
-                      const SizedBox(height: Tokens.s8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Session',
-                              style: Tokens.title2,
-                              textScaler: besideIsland(context),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: nav.game,
-                            child: Text(
-                              'Done',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textScaler: besideIsland(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const _Label('PLAYERS'),
-                      _Card(
-                        children: [
-                          _Row(
-                            text: named == 0
-                                ? '${session.playerCount} players'
-                                : '${session.playerCount} players · $named named',
-                          ),
-                          const _Divider(),
-                          _Row(
-                            text: 'Edit Players',
-                            trailing: '›',
-                            enabled: canEdit,
-                            onTap: () {
-                              setup.seed(session.playerCount, [
-                                for (final p in session.players) p.name,
-                              ]);
-                              nav.setup(editing: true);
-                            },
-                          ),
-                        ],
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(16, 6, 16, 0),
-                        child: Text(
-                          'Editing between rounds keeps the session; '
-                          'current round resets.',
-                          style: Tokens.footnote,
+                        const _Divider(),
+                        _Row(
+                          text: 'Edit Players',
+                          trailing: '›',
+                          enabled: canEdit,
+                          onTap: () {
+                            setup.seed(session.playerCount, [
+                              for (final p in session.players) p.name,
+                            ]);
+                            nav.setup(editing: true);
+                          },
                         ),
+                      ],
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 6, 16, 0),
+                      child: Text(
+                        'Editing between rounds keeps the session; '
+                        'current round resets.',
+                        style: Tokens.footnote,
                       ),
-                      const _Label('SESSION'),
-                      _Card(
-                        children: [
-                          _Row(
-                            text: 'End Session',
-                            color: Tokens.giver,
-                            enabled: !st.spinning,
-                            onTap: nav.confirmEnd,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                    const _Label('SESSION'),
+                    _Card(
+                      children: [
+                        _Row(
+                          text: 'End Session',
+                          color: Tokens.giver,
+                          enabled: !st.spinning,
+                          onTap: nav.confirmEnd,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
+          ],
         );
       },
     );

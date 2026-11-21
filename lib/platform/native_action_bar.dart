@@ -2,7 +2,15 @@ import 'package:flutter/widgets.dart';
 
 import 'native_island.dart';
 
-enum ActionBarStyle { primary, secondary, destructive, choice }
+enum ActionBarStyle {
+  primary,
+  secondary,
+  destructive,
+  choice,
+  prominent,
+  chip,
+  chipOn,
+}
 
 enum ActionBarLayout { stack, row }
 

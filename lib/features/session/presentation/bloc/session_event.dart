@@ -61,3 +61,7 @@ final class SessionLinkOpened extends SessionEvent {
 final class ReplayRequested extends SessionEvent {
   const ReplayRequested();
 }
+
+final class SummaryDismissed extends SessionEvent {
+  const SummaryDismissed();
+}

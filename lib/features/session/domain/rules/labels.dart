@@ -16,6 +16,14 @@ String displayLabel(Player p) {
   return p.name == null ? 'Player $n' : '${p.name} · P$n';
 }
 
+/// Seat that may no longer exist after Edit Players -> unnamed player.
+Player playerAt(List<Player> players, int seat) =>
+    seat < players.length ? players[seat] : Player(seat: seat);
+
+/// "P3" or "Kabir · P2" (round log, Home "last:" line).
+String shortLabel(Player p) =>
+    p.name == null ? 'P${p.seat + 1}' : '${p.name} · P${p.seat + 1}';
+
 /// Name only if non-null and unique among all players (trimmed,
 /// case-insensitive), else "Player N".
 String spokenName(Session s, int seat) {

@@ -3,10 +3,12 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spinfolk/core/failure.dart';
+import 'package:spinfolk/features/session/domain/entities/game_record.dart';
 import 'package:spinfolk/features/session/domain/entities/session.dart';
 import 'package:spinfolk/features/session/domain/rules/selection.dart';
 import 'package:spinfolk/features/session/presentation/bloc/session_bloc.dart';
 
+import 'support/fake_history_repository.dart';
 import 'support/fake_session_repository.dart';
 
 List<String?> nulls(int n) => List.filled(n, null);
@@ -25,8 +27,11 @@ void main() {
   late FakeSessionRepository repo;
   late SessionBloc bloc;
 
+  late FakeHistoryRepository history;
+
   setUp(() {
-    repo = FakeSessionRepository();
+    history = FakeHistoryRepository();
+    repo = FakeSessionRepository(history);
     bloc = SessionBloc(repo, Random(1));
   });
   tearDown(() => bloc.close());
@@ -288,18 +293,84 @@ void main() {
     });
   });
 
+  group('round log', () {
+    test('truth/dare logged, pass overwrites, next does not write', () async {
+      await startGame(8);
+      await spinAndFinish();
+      final o = active().session.outcome!;
+      await send(const ModeChosen(Mode.truth));
+      expect(active().session.log, [
+        RoundEntry(
+          round: 1,
+          taker: o.taker,
+          giver: o.giver,
+          result: RoundResult.truth,
+        ),
+      ]);
+      await send(const Passed()); // pass after truth overwrites the entry
+      expect(active().session.log.single.result, RoundResult.pass);
+      expect(active().session.round, 2);
+      await spinAndFinish();
+      await send(const ModeChosen(Mode.dare));
+      repo.calls.clear();
+      await send(const NextRoundRequested());
+      expect(repo.calls, ['saveRound']);
+      expect(active().session.log.map((e) => e.result), [
+        RoundResult.pass,
+        RoundResult.dare,
+      ]);
+      expect(repo.stored, active().session);
+    });
+
+    test('pass from revealed logs a pass', () async {
+      await startGame(8);
+      await spinAndFinish();
+      await send(const Passed());
+      expect(active().session.log.single.result, RoundResult.pass);
+    });
+
+    test('log write failure keeps previous state', () async {
+      await startGame(8);
+      await spinAndFinish();
+      repo.failWrites = true;
+      await send(const ModeChosen(Mode.truth));
+      expect(active().session.log, isEmpty);
+      expect(active().session.phase, Phase.revealed);
+      await send(const Passed());
+      expect(active().session.log, isEmpty);
+      expect(active().session.round, 1);
+    });
+  });
+
   group('EndConfirmed', () {
-    test('from active', () async {
+    test('no rounds: nothing archived, NoSession', () async {
       await startGame(8);
       await send(const EndConfirmed());
       expect(bloc.state, const NoSession());
       expect(repo.stored, isNull);
+      expect(history.rows, isEmpty);
     });
-    test('from resume prompt', () async {
+    test('with rounds: SessionSummary, archived', () async {
+      await startGame(8);
+      await spinAndFinish();
+      await send(const ModeChosen(Mode.truth));
+      await send(const NextRoundRequested());
+      await spinAndFinish();
+      await send(const Passed());
+      await send(const EndConfirmed());
+      final s = bloc.state as SessionSummary;
+      expect(s.game.rounds, hasLength(2));
+      expect(s.game.playerCount, 8);
+      expect(history.rows.single, s.game);
+      expect(repo.stored, isNull);
+    });
+    test('ignored in ResumePrompt', () async {
       repo.stored = stored(4);
       await send(const AppStarted());
+      repo.calls.clear();
       await send(const EndConfirmed());
-      expect(bloc.state, const NoSession());
+      expect(bloc.state, ResumePrompt(stored(4)));
+      expect(repo.calls, isEmpty);
     });
     test('ignored while spinning', () async {
       await startGame(8);
@@ -314,16 +385,67 @@ void main() {
       await send(const EndConfirmed());
       expect(active().failure, isA<StorageFailure>());
       expect(repo.stored, isNotNull);
-      repo.stored = stored(4);
-      final b = SessionBloc(repo, Random(1));
-      addTearDown(b.close);
-      b.add(const AppStarted());
-      await pumpEventQueue();
+    });
+  });
+
+  group('SessionSummary', () {
+    Future<GameRecord> finishOneRound() async {
+      await startGame(4);
+      await spinAndFinish();
+      await send(const ModeChosen(Mode.dare));
+      await send(const EndConfirmed());
+      return (bloc.state as SessionSummary).game;
+    }
+
+    test('SummaryDismissed -> NoSession', () async {
+      await finishOneRound();
+      await send(const SummaryDismissed());
+      expect(bloc.state, const NoSession());
+    });
+    test('SummaryDismissed ignored elsewhere', () async {
+      await startGame(4);
+      final before = bloc.state;
+      await send(const SummaryDismissed());
+      expect(bloc.state, before);
+    });
+    test('SessionStarted from summary starts a new game', () async {
+      await finishOneRound();
+      await send(SessionStarted(4, nulls(4)));
+      expect(active().session.round, 1);
+      expect(active().session.log, isEmpty);
+    });
+    test('SessionStarted failure from summary -> NoSession(notice)', () async {
+      await finishOneRound();
       repo.failWrites = true;
-      b.add(const EndConfirmed());
-      await pumpEventQueue();
-      final s = b.state as ResumePrompt;
-      expect(s.failure, isA<StorageFailure>());
+      await send(SessionStarted(4, nulls(4)));
+      expect(bloc.state, const NoSession(notice: "Couldn't save. Try again."));
+    });
+  });
+
+  group('SessionStarted from ResumePrompt', () {
+    test('archives a stored session with rounds', () async {
+      repo.stored = stored(4)
+          .revealed(const Outcome(taker: 0, giver: 2))
+          .chose(Mode.truth);
+      await send(const AppStarted());
+      await send(SessionStarted(3, nulls(3)));
+      expect(active().session.playerCount, 3);
+      expect(history.rows, hasLength(1));
+    });
+    test('a stored session without rounds is just replaced', () async {
+      repo.stored = stored(4);
+      await send(const AppStarted());
+      await send(SessionStarted(3, nulls(3)));
+      expect(history.rows, isEmpty);
+    });
+    test('failure keeps the prompt and shows it', () async {
+      repo.stored = stored(4);
+      await send(const AppStarted());
+      repo.failWrites = true;
+      await send(SessionStarted(3, nulls(3)));
+      final p = bloc.state as ResumePrompt;
+      expect(p.failure, isA<StorageFailure>());
+      expect(p.session, stored(4));
     });
   });
 

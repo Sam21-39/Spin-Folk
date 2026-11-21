@@ -1,0 +1,37 @@
+# DEFERRED (owner decision): not run in Phase 2b. Run when all phases are done.
+# History: play two rounds, End, Done, open it, back, swipe-delete, Undo, purge.
+appId: in.appamania.spinfolk
+---
+- launchApp:
+    clearState: true
+- tapOn: "New game"
+- tapOn: "Start session"
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- tapOn: "Truth"
+- tapOn: "Next Round"
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- tapOn: "Pass"
+- tapOn: "Session and settings"
+- tapOn: "End Session"
+- extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
+- tapOn: "End Session"
+- assertVisible: "Good game."
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-history-summary
+- tapOn: "Done"
+- tapOn: "History"
+- assertVisible: "TODAY"
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-history-list
+- tapOn: ".*2 rounds.*"
+- assertVisible: "ROUND LOG"
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-history-detail
+- tapOn: "History"
+- swipe: { from: ".*2 rounds.*", direction: LEFT }
+- assertVisible: "Game deleted"
+- takeScreenshot: docs/plans/phase-2b/evidence/p2b-history-undo
+- tapOn: "Undo"
+- assertVisible: ".*2 rounds.*"
+- swipe: { from: ".*2 rounds.*", direction: LEFT }
+- assertVisible: "Game deleted"
+- extendedWaitUntil: { visible: "No past games yet", timeout: 6000 }

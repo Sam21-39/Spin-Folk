@@ -84,3 +84,15 @@ final class SessionActive extends SessionState {
     replayCount,
   );
 }
+
+final class SessionSummary extends SessionState {
+  const SessionSummary(this.game);
+  final GameRecord game;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SessionSummary && other.game == game;
+
+  @override
+  int get hashCode => Object.hash(SessionSummary, game);
+}

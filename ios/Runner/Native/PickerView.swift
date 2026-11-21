@@ -32,7 +32,7 @@ final class PickerModel {
         sent.removeAll()
       }
     }
-    if newValue != value { value = newValue }
+    if newValue != value { withAnimation { value = newValue } }
   }
 }
 
@@ -49,7 +49,7 @@ struct PickerIsland: View {
         model.onChange?(v)
       }
     )) {
-      ForEach(model.min...model.max, id: \.self) { Text("\($0) players").tag($0) }
+      ForEach(model.min...model.max, id: \.self) { Text("\($0)").tag($0) }
     }
     .pickerStyle(.wheel)
     .fontDesign(.rounded)
