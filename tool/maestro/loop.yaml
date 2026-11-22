@@ -1,0 +1,53 @@
+appId: in.appamania.spinfolk
+# Run with: maestro test -e N=<players> -e TAG=<prefix> tool/maestro/loop.yaml
+---
+- launchApp
+- assertVisible: "Spinfolk"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-home
+- tapOn: "New game"
+- assertVisible: "New game"
+- tapOn: "Start session"
+- assertVisible: "Round 1 · ${N} players"
+- assertVisible: "Dial, ${N} players, ready to spin"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-ready
+- tapOn: "Spin"
+- assertVisible: "Spinning…"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-revealed
+- tapOn: "Truth"
+- scrollUntilVisible: { element: ".*a question, out loud\\." }
+- assertVisible: ".*a question, out loud\\."
+- tapOn: "Next Round"
+- assertVisible: "Round 2 · ${N} players"
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- tapOn: "Pass"
+- assertVisible: "Round 3 · ${N} players"
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- tapOn: "Dare"
+- scrollUntilVisible: { element: ".*a dare, out loud\\." }
+- assertVisible: ".*a dare, out loud\\."
+- tapOn: "Pass"
+- assertVisible: "Round 4 · ${N} players"
+- stopApp
+- launchApp
+- assertVisible: "Resume game"
+- assertVisible: "Round 4"
+- tapOn: "Resume game"
+- assertVisible: "Dial, ${N} players, ready to spin"
+- tapOn: "Session and settings"
+- extendedWaitUntil: { visible: "VOICE", timeout: 5000 }
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-sheet
+- scrollUntilVisible: { element: "End Session" }
+- tapOn: "End Session"
+- extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
+- tapOn: "End Session"
+- assertVisible: "Good game."
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-summary
+- tapOn: "Done"
+- assertVisible: "New game"

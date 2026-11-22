@@ -1,0 +1,12 @@
+# Subflow: screenshots of the Dynamic Island and of the Live Activity card, then back to the app.
+# Called with env NAME. Notification Center shows Live Activities like the Lock Screen does.
+appId: in.appamania.spinfolk
+---
+- pressKey: Home
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/p4-${NAME}-island
+- swipe: { start: "20%, 1%", end: "20%, 70%", duration: 600 }
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/p4-${NAME}-lock
+- pressKey: Home
+- launchApp: { stopApp: false }

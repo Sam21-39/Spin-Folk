@@ -1,0 +1,20 @@
+appId: in.appamania.spinfolk
+---
+- launchApp
+- assertVisible: "Spinfolk"
+- tapOn: "New game"
+- tapOn: "Start session"
+- assertVisible: "Round 1 · 8 players"
+- tapOn: "Session and settings"
+- scrollUntilVisible: { element: "Edit Players" }
+- tapOn: "Edit Players"
+- assertVisible: "How many in the circle?"
+- swipe: { start: "27%, 43%", end: "27%, 36%" }
+- tapOn: "Add names.*"
+- tapOn: "Name for player 1.*"
+- inputText: "Riya"
+- tapOn: "Done"
+- tapOn: "Save Players"
+- assertNotVisible: "Round 1 · 8 players"
+- assertVisible: "Round 1 · .* players"
+- takeScreenshot: docs/plans/phase-5/evidence/p2b-edit

@@ -1,0 +1,30 @@
+appId: in.appamania.spinfolk
+---
+- launchApp: { clearState: true }
+- tapOn: "New game"
+- tapOn: "Start session"
+- assertVisible: "Round 1 · .* players"
+- tapOn: "Session and settings"
+- assertVisible: "VOICE"
+- assertVisible: "Play sample"
+- tapOn: { point: "86%, 60%" } # Announcements switch off (row not in a11y tree)
+- takeScreenshot: docs/plans/phase-5/evidence/p3-sheet-voice
+- tapOn: "Done"
+- tapOn: "Spin"
+- stopApp # kill mid-spin (P3-D2)
+- launchApp
+- tapOn: "Resume game"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 5000 }
+- assertVisible: "Replay announcement"
+- takeScreenshot: docs/plans/phase-5/evidence/p3-resume-after-kill
+- tapOn: "Session and settings"
+- takeScreenshot: docs/plans/phase-5/evidence/p3-prefs-after-kill # switch must still be off (P3-D1)
+- tapOn: "Done"
+- tapOn: "Pass"                             # revealed -> ready, round 2
+- assertVisible: "Round 2 · .* players"
+- tapOn: "Spin"
+- pressKey: Home                            # background mid-spin (P3-D3)
+- launchApp: { stopApp: false }
+- extendedWaitUntil: { visible: "Taker .*", timeout: 3000 }
+- assertVisible: "Replay announcement"
+- takeScreenshot: docs/plans/phase-5/evidence/p3-background-return

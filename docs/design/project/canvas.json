@@ -1,0 +1,357 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-21T18:55:00Z"
+ },
+ "title": "Spinfolk \u2014 Design System",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [
+  {
+   "id": "system",
+   "name": "Design system"
+  },
+  {
+   "id": "screens",
+   "name": "Screens"
+  },
+  {
+   "id": "brand",
+   "name": "Logo & Live Activity"
+  },
+  {
+   "id": "flow2",
+   "name": "Flow v2 \u00b7 History"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 2620,
+   "title": "Foundations",
+   "page": "system"
+  },
+  "Components.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1900,
+   "title": "Components",
+   "page": "system"
+  },
+  "Dial.dc.html": {
+   "x": 1520,
+   "y": 2020,
+   "w": 1440,
+   "h": 1060,
+   "title": "Dial & bottle",
+   "page": "system"
+  },
+  "NewGame.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "New Game",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "AddNames.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Add Names",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Resume.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Resume",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Ready.dc.html": {
+   "x": 0,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Ready",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Spinning.dc.html": {
+   "x": 470,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Spinning",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Revealed.dc.html": {
+   "x": 940,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Revealed",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Challenge.dc.html": {
+   "x": 1410,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Challenge",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Crowd60.dc.html": {
+   "x": 1880,
+   "y": 1264,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 60 players, long names",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Settings.dc.html": {
+   "x": 0,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Session sheet",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "EndConfirm.dc.html": {
+   "x": 470,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "End confirmation",
+   "page": "screens",
+   "is_interactive": true
+  },
+  "Logo.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1220,
+   "title": "Logo",
+   "page": "brand"
+  },
+  "LiveActivity.dc.html": {
+   "x": 0,
+   "y": 1340,
+   "w": 1440,
+   "h": 1200,
+   "title": "Live Activity & Dynamic Island",
+   "page": "brand"
+  },
+  "UserFlow.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 2300,
+   "h": 760,
+   "title": "User flow v2",
+   "page": "flow2"
+  },
+  "Home.dc.html": {
+   "x": 0,
+   "y": 1180,
+   "w": 390,
+   "h": 844,
+   "title": "Home \u00b7 hub",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "NewGame2.dc.html": {
+   "x": 470,
+   "y": 1180,
+   "w": 390,
+   "h": 844,
+   "title": "New game v2",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "Ready2.dc.html": {
+   "x": 0,
+   "y": 2444,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Ready v2 (flick to spin)",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "RoundLog.dc.html": {
+   "x": 470,
+   "y": 2444,
+   "w": 390,
+   "h": 844,
+   "title": "Round log sheet",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "EndSummary.dc.html": {
+   "x": 940,
+   "y": 2444,
+   "w": 390,
+   "h": 844,
+   "title": "End summary",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "History.dc.html": {
+   "x": 0,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistorySwipe.dc.html": {
+   "x": 470,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 swipe to delete",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "DeleteConfirm.dc.html": {
+   "x": 940,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "Delete confirmation",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistoryUndo.dc.html": {
+   "x": 1410,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 undo toast",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistoryDetail.dc.html": {
+   "x": 1880,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 game detail",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistoryEmpty.dc.html": {
+   "x": 2350,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 empty",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "Interactions.dc.html": {
+   "x": 0,
+   "y": 4972,
+   "w": 1440,
+   "h": 1180,
+   "title": "Interaction spec",
+   "page": "flow2"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Components.dc.html",
+  "Dial.dc.html",
+  "NewGame.dc.html",
+  "AddNames.dc.html",
+  "Resume.dc.html",
+  "Ready.dc.html",
+  "Spinning.dc.html",
+  "Revealed.dc.html",
+  "Challenge.dc.html",
+  "Crowd60.dc.html",
+  "Settings.dc.html",
+  "EndConfirm.dc.html",
+  "Logo.dc.html",
+  "LiveActivity.dc.html",
+  "UserFlow.dc.html",
+  "Home.dc.html",
+  "NewGame2.dc.html",
+  "Ready2.dc.html",
+  "RoundLog.dc.html",
+  "EndSummary.dc.html",
+  "History.dc.html",
+  "HistorySwipe.dc.html",
+  "DeleteConfirm.dc.html",
+  "HistoryUndo.dc.html",
+  "HistoryDetail.dc.html",
+  "HistoryEmpty.dc.html",
+  "Interactions.dc.html"
+ ],
+ "notes": {
+  "title-0": {
+   "x": 0,
+   "y": -300,
+   "text": "Setup",
+   "kind": "title1",
+   "maxW": 1330,
+   "page": "screens"
+  },
+  "title-1": {
+   "x": 0,
+   "y": 964,
+   "text": "Game loop",
+   "kind": "title1",
+   "maxW": 2270,
+   "page": "screens"
+  },
+  "title-2": {
+   "x": 0,
+   "y": 2228,
+   "text": "Session",
+   "kind": "title1",
+   "maxW": 860,
+   "page": "screens"
+  },
+  "flow2-title-0": {
+   "x": 0,
+   "y": 880,
+   "text": "Entry",
+   "kind": "title1",
+   "maxW": 860,
+   "page": "flow2"
+  },
+  "flow2-title-1": {
+   "x": 0,
+   "y": 2144,
+   "text": "Game enhancements",
+   "kind": "title1",
+   "maxW": 1330,
+   "page": "flow2"
+  },
+  "flow2-title-2": {
+   "x": 0,
+   "y": 3408,
+   "text": "History",
+   "kind": "title1",
+   "maxW": 2740,
+   "page": "flow2"
+  }
+ },
+ "designSystems": []
+}

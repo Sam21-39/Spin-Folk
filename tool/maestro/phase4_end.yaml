@@ -1,0 +1,14 @@
+# Relaunch keeps exactly one activity; End Session removes it.
+appId: in.appamania.spinfolk
+---
+- launchApp                                                     # cold start
+- assertVisible: "Resume game"
+- runFlow: { file: la_shot.yaml, env: { NAME: 5-relaunch } }    # P4-D6: one activity, not two
+- tapOn: "Resume game"
+- tapOn: "Session and settings"
+- scrollUntilVisible: { element: "End Session" }
+- tapOn: "End Session"
+- extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
+- tapOn: "End Session"
+- assertVisible: "Good game."
+- runFlow: { file: la_shot.yaml, env: { NAME: 6-ended } }       # P4-D5: no island, no card

@@ -1,0 +1,33 @@
+# History: play two rounds, End, Done, open it, back; swipe-delete, toast, purge (Undo = manual check: toast animation blocks Maestro tap inside 5 s window).
+appId: in.appamania.spinfolk
+---
+- launchApp:
+    clearState: true
+- tapOn: "New game"
+- tapOn: "Start session"
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- tapOn: "Truth"
+- tapOn: "Next Round"
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- tapOn: "Pass"
+- tapOn: "Session and settings"
+- scrollUntilVisible: { element: "End Session" }
+- tapOn: "End Session"
+- extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
+- tapOn: "End Session"
+- assertVisible: "Good game."
+- takeScreenshot: docs/plans/phase-5/evidence/p2b-history-summary
+- tapOn: "Done"
+- tapOn: "History"
+- assertVisible: "TODAY"
+- takeScreenshot: docs/plans/phase-5/evidence/p2b-history-list
+- tapOn: ".*2 rounds.*"
+- assertVisible: "ROUND LOG"
+- takeScreenshot: docs/plans/phase-5/evidence/p2b-history-detail
+- tapOn: "History"
+- swipe: { start: "90%, 28%", end: "10%, 28%", duration: 400, waitToSettleTimeoutMs: 200 }
+- extendedWaitUntil: { visible: "Game deleted", timeout: 3000 }
+- takeScreenshot: docs/plans/phase-5/evidence/p2b-history-undo
+- extendedWaitUntil: { visible: "No past games yet", timeout: 12000 }
