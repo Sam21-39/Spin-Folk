@@ -496,4 +496,49 @@ void main() {
       expect(active().session.round, 4);
     });
   }
+
+  group('liveReveal', () {
+    test('true only after SpinAnimationFinished', () async {
+      await startGame(4);
+      expect(active().liveReveal, isFalse);
+      await send(const SpinRequested());
+      expect(active().liveReveal, isFalse);
+      await send(const SpinAnimationFinished());
+      expect(active().liveReveal, isTrue);
+      await send(const ReplayRequested());
+      expect(active().liveReveal, isFalse);
+      await send(const ModeChosen(Mode.truth));
+      expect(active().liveReveal, isFalse);
+    });
+
+    test('false after AppBackgrounded', () async {
+      await startGame(4);
+      await send(const SpinRequested());
+      await send(const AppBackgrounded());
+      expect(active().session.phase, Phase.revealed);
+      expect(active().liveReveal, isFalse);
+    });
+
+    test('false after ResumeConfirmed of a revealed session', () async {
+      repo.stored = stored(
+        4,
+        phase: Phase.revealed,
+        o: const Outcome(taker: 0, giver: 2),
+      );
+      await send(const AppStarted());
+      await send(const ResumeConfirmed());
+      expect(active().liveReveal, isFalse);
+    });
+
+    test('false after Passed and a failed ModeChosen', () async {
+      await startGame(4);
+      await spinAndFinish();
+      repo.failWrites = true;
+      await send(const ModeChosen(Mode.dare));
+      expect(active().liveReveal, isFalse);
+      repo.failWrites = false;
+      await send(const Passed());
+      expect(active().liveReveal, isFalse);
+    });
+  });
 }

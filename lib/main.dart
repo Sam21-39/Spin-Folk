@@ -8,6 +8,7 @@ import 'app/app.dart';
 import 'core/di/injection.dart';
 import 'features/history/presentation/cubit/history_cubit.dart';
 import 'features/session/presentation/bloc/session_bloc.dart';
+import 'platform/announcer.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,7 @@ Future<void> bootstrap(Future<void> Function() init) async {
   if (bloc.state is SessionLoading) {
     await bloc.stream.firstWhere((s) => s is! SessionLoading);
   }
+  getIt<Announcer>().start();
   unawaited(getIt<HistoryCubit>().load());
   runApp(const SpinfolkApp());
 }

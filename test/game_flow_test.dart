@@ -6,7 +6,12 @@ import 'package:spinfolk/app/app_navigator.dart';
 import 'package:spinfolk/features/session/domain/entities/session.dart';
 import 'package:spinfolk/features/session/domain/rules/selection.dart';
 import 'package:spinfolk/features/session/presentation/bloc/session_bloc.dart';
+import 'package:spinfolk/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:spinfolk/features/setup/presentation/cubit/setup_cubit.dart';
+
+import 'package:spinfolk/features/settings/domain/prefs.dart';
+import 'package:spinfolk/platform/adaptive_controls.dart';
+import 'package:spinfolk/platform/announcer.dart';
 
 import 'support/harness.dart';
 
@@ -84,6 +89,8 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Session and settings'));
       await tester.pumpAndSettle();
       expect(find.text('Edit Players'), findsOneWidget);
+      await tester.ensureVisible(find.text('End Session'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('End Session'));
       await tester.pumpAndSettle();
       expect(find.text('End this session?'), findsOneWidget);
@@ -271,6 +278,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Session and settings'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Edit Players'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Edit Players'));
     await tester.pumpAndSettle();
     expect(find.text('Edit Players'), findsOneWidget); // page title
@@ -287,6 +296,8 @@ void main() {
     await tapBar(tester, 'resume');
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Session and settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Edit Players'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit Players'));
     await tester.pumpAndSettle();
@@ -350,5 +361,169 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('New game'), findsOneWidget);
     expect(find.text('Add names'), findsOneWidget);
+  });
+
+  group('announcements', () {
+    Future<void> resumeAndSpin(WidgetTester tester, {Prefs? prefs}) async {
+      await pumpApp(
+        tester,
+        stored: storedSession(Phase.ready),
+        prefs: prefs ?? const Prefs(),
+      );
+      await tapBar(tester, 'resume');
+      await tester.pumpAndSettle();
+      await spin(tester);
+    }
+
+    String spokenOnScreen(WidgetTester tester) {
+      final t =
+          find
+                  .byWidgetPredicate(
+                    (w) =>
+                        w is Text &&
+                        (w.data ?? '').startsWith('“') &&
+                        (w.data ?? '').endsWith('”'),
+                  )
+                  .evaluate()
+                  .single
+                  .widget
+              as Text;
+      final d = t.data!;
+      return d.substring(1, d.length - 1);
+    }
+
+    testWidgets('live reveal speaks, Replay repeats, mode line on Replay', (
+      tester,
+    ) async {
+      final h = tester.ensureSemantics();
+      await resumeAndSpin(tester);
+      expect(find.bySemanticsLabel('Replay announcement'), findsOneWidget);
+      var calls = native.named('speech.speak');
+      expect(calls, hasLength(1));
+      expect((calls.single.arguments as Map)['text'], spokenOnScreen(tester));
+
+      await tester.tap(find.bySemanticsLabel('Replay announcement'));
+      await tester.pump();
+      await tester.pump();
+      expect(native.named('speech.speak'), hasLength(2));
+
+      await tapBar(tester, 'truth');
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Replay announcement'), findsOneWidget);
+      await tester.ensureVisible(find.bySemanticsLabel('Replay announcement'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Replay announcement'));
+      await tester.pump();
+      await tester.pump();
+      calls = native.named('speech.speak');
+      expect(calls, hasLength(3));
+      expect((calls.last.arguments as Map)['text'], endsWith('chose Truth.'));
+      h.dispose();
+    });
+
+    testWidgets('voice failure replaces the row until the next round', (
+      tester,
+    ) async {
+      final h = tester.ensureSemantics();
+      await pumpApp(tester, stored: storedSession(Phase.ready));
+      native.failSpeak = true;
+      await tapBar(tester, 'resume');
+      await tester.pumpAndSettle();
+      await spin(tester);
+      expect(find.text(Announcer.unavailableText), findsOneWidget);
+      expect(find.bySemanticsLabel('Replay announcement'), findsNothing);
+      await tapBar(tester, 'pass');
+      await tester.pumpAndSettle();
+      expect(find.text(Announcer.unavailableText), findsNothing);
+      h.dispose();
+    });
+
+    testWidgets('hide mid-spin reveals without speaking', (tester) async {
+      final h = tester.ensureSemantics();
+      await pumpApp(tester, stored: storedSession(Phase.ready));
+      await tapBar(tester, 'resume');
+      await tester.pumpAndSettle();
+      await tapBar(tester, 'spin');
+      await tester.pump(const Duration(milliseconds: 300));
+      tester.binding
+        ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+        ..handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      addTearDown(() {
+        tester.binding
+          ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+          ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      });
+      await tester.pump();
+      await tester.pump();
+      expect(
+        find.bySemanticsLabel(RegExp('^Taker .*, Giver .*')),
+        findsOneWidget,
+      );
+      expect(native.named('speech.speak'), isEmpty);
+      h.dispose();
+    });
+
+    testWidgets('settings sheet drives prefs', (tester) async {
+      await resumeAndSpin(tester);
+      native.voices = [
+        {'id': 'a', 'name': 'Amy', 'language': 'en-US', 'quality': 'enhanced'},
+        {'id': 'b', 'name': 'Bob', 'language': 'en-US', 'quality': 'default'},
+      ];
+      await tester.tap(find.bySemanticsLabel('Session and settings'));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      for (final t in ['Announcements', 'Voice', 'Speed', 'Play sample']) {
+        expect(find.text(t), findsOneWidget, reason: t);
+      }
+      expect(native.named('speech.voices'), hasLength(1));
+
+      tester.widget<NativeSwitch>(find.byType(NativeSwitch)).onChanged(false);
+      await tester.pump();
+      expect(prefsRepo.saved.last.announce, isFalse);
+
+      final slider = tester.widget<NativeSlider>(find.byType(NativeSlider));
+      final before = prefsRepo.saved.length;
+      slider.onChanged(0.6);
+      await tester.pump();
+      expect(find.text('Fast'), findsOneWidget);
+      expect(prefsRepo.saved.length, before);
+      slider.onChangeEnd(0.6);
+      await tester.pump();
+      expect(prefsRepo.saved.last.rate, 0.6);
+
+      await tester.tap(find.text('Voice'));
+      await tester.pump();
+      expect(find.text('Amy (Enhanced)'), findsOneWidget);
+      expect(find.text('Bob'), findsOneWidget);
+      expect(find.text('Default'), findsOneWidget);
+      await tester.tap(find.text('Bob'));
+      await tester.pump();
+      expect(find.text('Bob ›'), findsOneWidget);
+      expect(prefsRepo.saved.last.voiceId, 'b');
+
+      final speaks = native.named('speech.speak').length;
+      await tester.tap(find.text('Play sample'));
+      await tester.pump();
+      await tester.pump();
+      final c = native.named('speech.speak');
+      expect(c, hasLength(speaks + 1));
+      expect((c.last.arguments as Map)['text'], Announcer.sampleLine);
+    });
+
+    testWidgets('End Session leaves prefs alone', (tester) async {
+      await resumeAndSpin(tester);
+      await tapBar(tester, 'truth');
+      read<SetupCubit>(tester); // harness sanity: providers present
+      await read<SettingsCubit>(tester).announceToggled(false);
+      final saved = prefsRepo.saved.length;
+      read<AppNavigator>(tester).confirmEnd();
+      await tester.pumpAndSettle();
+      await tapBar(tester, 'confirm');
+      await tester.pumpAndSettle();
+      expect(read<SessionBloc>(tester).state, isNot(isA<SessionActive>()));
+      expect(prefsRepo.saved.length, saved);
+      expect(prefsRepo.stored.announce, isFalse);
+      expect(native.named('speech.stop'), isNotEmpty);
+    });
   });
 }
