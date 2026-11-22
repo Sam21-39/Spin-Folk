@@ -1,0 +1,14 @@
+# Run with both accessibility settings ON. A normal spin takes at least 4.4 s; the 3 s limit proves the short path.
+appId: in.appamania.spinfolk
+---
+- launchApp: { clearState: true }
+- tapOn: "New game"
+- tapOn: "Start session"
+- assertVisible: "Dial, .* players, ready to spin"
+- takeScreenshot: docs/plans/phase-5/evidence/p1-reduced-ready
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 3000 }
+- takeScreenshot: docs/plans/phase-5/evidence/p1-reduced-revealed
+- tapOn: "Session and settings"
+- extendedWaitUntil: { visible: "VOICE", timeout: 5000 }
+- takeScreenshot: docs/plans/phase-5/evidence/p1-reduced-sheet

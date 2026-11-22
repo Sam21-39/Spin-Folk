@@ -66,9 +66,13 @@ class _Game extends StatelessWidget {
     final sc = barScale(context);
     final phase = session.phase;
     final spinning = st.spinning;
-    final f = spinning || phase == Phase.ready
-        ? 0.70
-        : (phase == Phase.revealed ? 0.56 : 0.44);
+    // Big text: shrink the dial so the role cards keep room (panel scrolls).
+    final grow = MediaQuery.textScalerOf(context).scale(17) / 17;
+    final f =
+        (spinning || phase == Phase.ready
+            ? 0.70
+            : (phase == Phase.revealed ? 0.56 : 0.44)) /
+        grow.clamp(1.0, 2.0);
 
     Widget bar(
       List<ActionBarItem> items, [

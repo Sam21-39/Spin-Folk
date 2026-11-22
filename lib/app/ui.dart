@@ -15,7 +15,8 @@ class PageFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-    child: Center(
+    child: Align(
+      alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: Tokens.maxContentWidth),
         child: inset

@@ -47,6 +47,12 @@ void main() {
     expect(find.text('New game'), findsOneWidget);
   });
 
+  testWidgets('content is anchored to the top, not centred', (tester) async {
+    await pumpApp(tester, history: [game('a')]);
+    await toHistory(tester);
+    expect(tester.getTopLeft(find.text('Home')).dy, lessThan(120));
+  });
+
   testWidgets('list is grouped by date', (tester) async {
     await pumpApp(
       tester,
@@ -73,6 +79,20 @@ void main() {
     expect(find.byType(GameRow), findsNWidgets(2));
     expect(find.text('Game deleted'), findsNothing);
     expect(historyRepo().deleted, isEmpty);
+  });
+
+  testWidgets('undo toast sits at the screen bottom on a short list', (
+    tester,
+  ) async {
+    await pumpApp(tester, history: [game('a'), game('b')]);
+    await toHistory(tester);
+    await tester.drag(find.byType(Dismissible).first, const Offset(-400, 0));
+    await frames(tester);
+    expect(
+      tester.getBottomLeft(find.text('Game deleted')).dy,
+      greaterThan(844 * 0.8),
+    );
+    expect(tester.getTopLeft(find.text('Home')).dy, lessThan(120));
   });
 
   testWidgets('no undo: the row is purged and the toast leaves', (
