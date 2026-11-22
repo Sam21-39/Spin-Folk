@@ -207,3 +207,6 @@ None block the work; each has a default that will be built unless the owner says
 - Non-island glass elements (round pill, settings button, sheet Done, End-confirm text card): solid `bgRaised` surfaces, same shapes. Only picker + action bar are native glass.
 - All open-question defaults approved: Dare line "{giver} gives {taker} a dare, out loud."; Nunito variable font pinned to wght 800; Resume shows current round status; `SPINFOLK_INITIAL_COUNT` compile-time test hook; iPhone portrait lock.
 - Phase 0–1 committed and pushed on branch `phase-0-1`; Phase 2 continues on that branch.
+
+## Implementation deviations
+- D12 fallback (drop native bars while a sheet/dialog covers the game) is built by default, not only on failure: the simulator showed native bars painting over the sheet scrim.

@@ -1,0 +1,46 @@
+# SE-size / large-text screenshots. Build with SPINFOLK_INITIAL_COUNT=2 so both
+# roles are always named (long-name layout guaranteed).
+# Run: maestro test -e TAG=<size> -e Y1=<row1 %> -e Y2=<row2 %> -e TYPE=yes|no tool/maestro/screens.yaml
+appId: in.appamania.spinfolk
+---
+- launchApp
+- assertVisible: "New Game"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-new-game
+- swipe: { start: "2%, 70%", end: "2%, 10%" }
+- swipe: { start: "2%, 70%", end: "2%, 10%" }
+- tapOn: "Add Names.*"
+- runFlow:
+    when:
+      true: ${TYPE == 'yes'}
+    commands:
+      - tapOn: { point: "50%,${Y1}%" }
+      - inputText: "Abcdefghijklmnopqrstuvwxyz0123456789ABCD"
+      - tapOn: { point: "50%,${Y2}%" }
+      - inputText: "Wxyzabcdefghijklmnopqrstuvwxyz0123456789"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-names
+- tapOn: "Done"
+- tapOn: "Start Session"
+- assertVisible: "Round 1 · 2 players"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-ready
+- tapOn: "Spin"
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-revealed
+- tapOn: "Truth"
+- assertVisible: "Next Round"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-challenge
+- tapOn: "Session and settings"
+- extendedWaitUntil: { visible: "Edit Players", timeout: 5000 }
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-sheet
+- scrollUntilVisible: { element: "End Session" }
+- tapOn: "End Session"
+- extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-2/evidence/p2-se-${TAG}-end
+- tapOn: "Cancel"
+- assertVisible: "Round 1 · 2 players"

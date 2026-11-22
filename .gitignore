@@ -54,3 +54,6 @@ app.*.map.json
 *.p12
 *.cer
 *.p8
+
+# Test evidence (screenshots, logs) stays local
+docs/plans/*/evidence/

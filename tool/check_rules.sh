@@ -15,7 +15,6 @@ src "package:flutter/(material|cupertino)\.dart" lib/ test/ \
 # StatefulWidget is allowed only to own an AnimationController.
 src -l 'extends StatefulWidget' lib/ \
   | grep -v -e '^lib/features/game/presentation/widgets/spin_stage.dart$' \
-            -e '^lib/dev/proof_spin.dart$' \
   && bad 'StatefulWidget outside the allowlist'
 
 layers=$(find lib/features -type d \( -name domain -o -name data -o -name bloc -o -name cubit \) 2>/dev/null)
@@ -23,6 +22,9 @@ layers=$(find lib/features -type d \( -name domain -o -name data -o -name bloc -
 
 domain=$(find lib/features -type d -name domain 2>/dev/null)
 [ -n "$domain" ] && src "dart:ui|package:(flutter|sqflite|get_it|shared_preferences)" $domain && bad 'domain must be pure Dart'
+
+pres=$(find lib/features -type d -name presentation 2>/dev/null)
+[ -n "$pres" ] && src "^import .*/data/" $pres && bad 'presentation must not import data'
 
 [ "$fail" -eq 0 ] && echo 'check_rules: OK'
 exit "$fail"

@@ -20,6 +20,10 @@
   {
    "id": "brand",
    "name": "Logo & Live Activity"
+  },
+  {
+   "id": "flow2",
+   "name": "Flow v2 \u00b7 History"
   }
  ],
  "boards": {
@@ -152,6 +156,121 @@
    "h": 1200,
    "title": "Live Activity & Dynamic Island",
    "page": "brand"
+  },
+  "UserFlow.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 2300,
+   "h": 760,
+   "title": "User flow v2",
+   "page": "flow2"
+  },
+  "Home.dc.html": {
+   "x": 0,
+   "y": 1180,
+   "w": 390,
+   "h": 844,
+   "title": "Home \u00b7 hub",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "NewGame2.dc.html": {
+   "x": 470,
+   "y": 1180,
+   "w": 390,
+   "h": 844,
+   "title": "New game v2",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "Ready2.dc.html": {
+   "x": 0,
+   "y": 2444,
+   "w": 390,
+   "h": 844,
+   "title": "Game \u00b7 Ready v2 (flick to spin)",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "RoundLog.dc.html": {
+   "x": 470,
+   "y": 2444,
+   "w": 390,
+   "h": 844,
+   "title": "Round log sheet",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "EndSummary.dc.html": {
+   "x": 940,
+   "y": 2444,
+   "w": 390,
+   "h": 844,
+   "title": "End summary",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "History.dc.html": {
+   "x": 0,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistorySwipe.dc.html": {
+   "x": 470,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 swipe to delete",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "DeleteConfirm.dc.html": {
+   "x": 940,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "Delete confirmation",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistoryUndo.dc.html": {
+   "x": 1410,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 undo toast",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistoryDetail.dc.html": {
+   "x": 1880,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 game detail",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "HistoryEmpty.dc.html": {
+   "x": 2350,
+   "y": 3708,
+   "w": 390,
+   "h": 844,
+   "title": "History \u00b7 empty",
+   "page": "flow2",
+   "is_interactive": true
+  },
+  "Interactions.dc.html": {
+   "x": 0,
+   "y": 4972,
+   "w": 1440,
+   "h": 1180,
+   "title": "Interaction spec",
+   "page": "flow2"
   }
  },
  "order": [
@@ -169,7 +288,20 @@
   "Settings.dc.html",
   "EndConfirm.dc.html",
   "Logo.dc.html",
-  "LiveActivity.dc.html"
+  "LiveActivity.dc.html",
+  "UserFlow.dc.html",
+  "Home.dc.html",
+  "NewGame2.dc.html",
+  "Ready2.dc.html",
+  "RoundLog.dc.html",
+  "EndSummary.dc.html",
+  "History.dc.html",
+  "HistorySwipe.dc.html",
+  "DeleteConfirm.dc.html",
+  "HistoryUndo.dc.html",
+  "HistoryDetail.dc.html",
+  "HistoryEmpty.dc.html",
+  "Interactions.dc.html"
  ],
  "notes": {
   "title-0": {
@@ -195,6 +327,30 @@
    "kind": "title1",
    "maxW": 860,
    "page": "screens"
+  },
+  "flow2-title-0": {
+   "x": 0,
+   "y": 880,
+   "text": "Entry",
+   "kind": "title1",
+   "maxW": 860,
+   "page": "flow2"
+  },
+  "flow2-title-1": {
+   "x": 0,
+   "y": 2144,
+   "text": "Game enhancements",
+   "kind": "title1",
+   "maxW": 1330,
+   "page": "flow2"
+  },
+  "flow2-title-2": {
+   "x": 0,
+   "y": 3408,
+   "text": "History",
+   "kind": "title1",
+   "maxW": 2740,
+   "page": "flow2"
   }
  },
  "designSystems": []
