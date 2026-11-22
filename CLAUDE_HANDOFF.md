@@ -1,3 +1,5 @@
+> Superseded by docs/spec-v2.md where they disagree (GetX → BLoC, GetStorage → sqflite).
+
 # Spinfolk — Claude implementation handoff
 
 Build Spinfolk from scratch as a polished, offline, single-phone Truth-or-Dare party game, primarily for iPhone. This document is the product specification and phased implementation brief. The owner is Sumit Pal, GitHub account Sam21-39. The intended public repository is Sam21-39/Spin-Folk; verify whether it exists before configuring a remote. Display name: Spinfolk. Dart package name: spinfolk. Do not invent an Apple team ID, bundle identifier owned by the user, signing credentials, or App Store Connect record.

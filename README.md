@@ -16,10 +16,10 @@ Planning and implementation handoff are complete. The app has not been implement
 
 ## Planned stack
 
-Flutter, GetX for state/routing/dependency injection, GetStorage, native iOS controls and speech, and ActivityKit with a SwiftUI Live Activity extension.
+Flutter 3.50.1 via FVM, flutter_bloc, get_it + injectable, go_router, sqflite, shared_preferences, native SwiftUI glass islands, ActivityKit.
 
 ## Implementation brief
 
-Read [the complete phased Claude handoff](CLAUDE_HANDOFF.md) for requirements, native integration, animation rules, tests, milestones, and TestFlight prerequisites.
+Read [the implementation spec](docs/spec-v2.md) (the phased handoff in [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) is partly superseded) for requirements, native integration, animation rules, tests, milestones, and TestFlight prerequisites.
 
 Native glass is a core requirement. Live Activities follow the playable core. The one-to-two-hour target depends on tooling and signing; Apple processing time is separate.
