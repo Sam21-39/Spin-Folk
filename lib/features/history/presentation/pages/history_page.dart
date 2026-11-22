@@ -173,6 +173,7 @@ class _List extends StatelessWidget {
     );
 
     return Stack(
+      fit: StackFit.expand,
       children: [
         SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(

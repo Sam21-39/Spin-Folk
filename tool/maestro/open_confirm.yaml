@@ -1,0 +1,4 @@
+# Accepts the system "Open in Spinfolk?" prompt that simctl openurl triggers (SpringBoard owns it).
+appId: com.apple.springboard
+---
+- tapOn: { text: "Open", optional: true }

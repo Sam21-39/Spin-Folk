@@ -1,13 +1,21 @@
-# DEFERRED: run in the post-Phase-5 device pass. Not executed in Phase 4.
+# Live Activity: start, updates after reveal / mode / next round. Leaves the app in the background.
 appId: in.appamania.spinfolk
 ---
 - launchApp: { clearState: true }
-# ⟨start a game⟩                       -> P4-D1: activity appears (one-line card)
+- tapOn: "New game"
+- tapOn: "Start session"
+- assertVisible: "Round 1 · .* players"
+- runFlow: { file: la_shot.yaml, env: { NAME: 1-started } }     # P4-D1: card, no roles
 - tapOn: "Spin"
-- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }     # P4-D2: tiles now, not before
+- extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
+- waitForAnimationToEnd
+- runFlow: { file: la_shot.yaml, env: { NAME: 2-revealed } }    # P4-D2/D3: two role tiles
 - tapOn: "Truth"
+- runFlow: { file: la_shot.yaml, env: { NAME: 3-challenge } }   # mode shown
+- tapOn: "Next Round"
+- assertVisible: "Round 2 · .* players"
+- runFlow: { file: la_shot.yaml, env: { NAME: 4-next } }        # round 2
 - tapOn: "Session and settings"
 - assertNotVisible: "Lock Screen updates are off in iOS Settings."
 - tapOn: "Done"
-- pressKey: Home                         # island shows compact content (P4-D3)
-- takeScreenshot: docs/plans/phase-4/evidence/p4-island-compact
+- pressKey: Home

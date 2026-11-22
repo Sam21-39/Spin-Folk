@@ -478,9 +478,28 @@ void main() {
       }
       expect(native.named('speech.voices'), hasLength(1));
 
-      tester.widget<NativeSwitch>(find.byType(NativeSwitch)).onChanged(false);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Announcements')),
+        matchesSemantics(
+          label: 'Announcements',
+          hasToggledState: true,
+          isToggled: true,
+          hasTapAction: true,
+        ),
+      );
+      tester.semantics.tap(find.semantics.byLabel('Announcements'));
+      await tester.pump();
       await tester.pump();
       expect(prefsRepo.saved.last.announce, isFalse);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Announcements')),
+        matchesSemantics(
+          label: 'Announcements',
+          hasToggledState: true,
+          isToggled: false,
+          hasTapAction: true,
+        ),
+      );
 
       final slider = tester.widget<NativeSlider>(find.byType(NativeSlider));
       final before = prefsRepo.saved.length;

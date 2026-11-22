@@ -240,7 +240,12 @@ class _VoiceSection extends StatelessWidget {
                   const _Label('VOICE'),
                   _Card(
                     children: [
-                      MergeSemantics(
+                      // One node: the native switch's own node is not exposed.
+                      Semantics(
+                        label: 'Announcements',
+                        toggled: prefs.announce,
+                        onTap: () => cubit.announceToggled(!prefs.announce),
+                        excludeSemantics: true,
                         child: _Row(
                           text: 'Announcements',
                           trailingWidget: NativeSwitch(

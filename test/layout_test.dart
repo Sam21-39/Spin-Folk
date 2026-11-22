@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spinfolk/app/app_navigator.dart';
+import 'package:spinfolk/features/game/presentation/widgets/spin_stage.dart';
 import 'package:spinfolk/features/history/presentation/cubit/history_cubit.dart';
 import 'package:spinfolk/features/session/domain/entities/game_record.dart';
 import 'package:spinfolk/features/session/domain/entities/session.dart';
@@ -306,4 +307,23 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('big text shrinks the dial', (tester) async {
+    Future<double> dial(double scale) async {
+      await pumpApp(
+        tester,
+        stored: session(6, Phase.ready),
+        size: const Size(390, 844),
+        textScale: scale,
+      );
+      await tapBar(tester, 'resume');
+      await tester.pumpAndSettle();
+      return tester.getSize(find.byType(SpinStage)).height;
+    }
+
+    final normal = await dial(1);
+    final big = await dial(2);
+    expect(big, lessThanOrEqualTo(normal * 0.65));
+    expect(big, greaterThanOrEqualTo(120));
+  });
 }

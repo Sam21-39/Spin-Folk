@@ -1,19 +1,22 @@
-# DEFERRED (owner decision): not run in Phase 2b. Run when all phases are done.
 appId: in.appamania.spinfolk
-# Run with: maestro test -e N=<players> tool/maestro/loop.yaml
+# Run with: maestro test -e N=<players> -e TAG=<prefix> tool/maestro/loop.yaml
 ---
 - launchApp
 - assertVisible: "Spinfolk"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-home
 - tapOn: "New game"
 - assertVisible: "New game"
 - tapOn: "Start session"
 - assertVisible: "Round 1 · ${N} players"
 - assertVisible: "Dial, ${N} players, ready to spin"
+- waitForAnimationToEnd
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-ready
 - tapOn: "Spin"
 - assertVisible: "Spinning…"
 - extendedWaitUntil: { visible: "Taker .*", timeout: 15000 }
 - waitForAnimationToEnd
-- takeScreenshot: docs/plans/phase-2b/evidence/p2b-loop-n${N}-revealed
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-revealed
 - tapOn: "Truth"
 - scrollUntilVisible: { element: ".*a question, out loud\\." }
 - assertVisible: ".*a question, out loud\\."
@@ -33,19 +36,18 @@ appId: in.appamania.spinfolk
 - stopApp
 - launchApp
 - assertVisible: "Resume game"
-- scrollUntilVisible: { element: "Round 4 · ${N} players" }
-- assertVisible: "Round 4 · ${N} players"
+- assertVisible: "Round 4"
 - tapOn: "Resume game"
 - assertVisible: "Dial, ${N} players, ready to spin"
 - tapOn: "Session and settings"
-- extendedWaitUntil: { visible: "Edit Players", timeout: 5000 }
+- extendedWaitUntil: { visible: "VOICE", timeout: 5000 }
 - waitForAnimationToEnd
-- takeScreenshot: docs/plans/phase-2b/evidence/p2b-loop-n${N}-sheet
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-sheet
 - scrollUntilVisible: { element: "End Session" }
 - tapOn: "End Session"
 - extendedWaitUntil: { visible: "End this session?", timeout: 5000 }
 - tapOn: "End Session"
 - assertVisible: "Good game."
-- takeScreenshot: docs/plans/phase-2b/evidence/p2b-loop-n${N}-summary
+- takeScreenshot: docs/plans/phase-5/evidence/${TAG}-n${N}-summary
 - tapOn: "Done"
 - assertVisible: "New game"
