@@ -126,7 +126,7 @@ Each: problem → options → pick.
 | spinning | nothing |
 | carries a session, payload ≠ last sent | if the session id changed: `activity.end` for the old one first; then `activity.sync`; report status |
 | carries a session, payload = last sent | nothing |
-| no session, and one was known | `activity.end {sessionId, rounds: round}` |
+| no session, and one was known | `activity.end {sessionId, rounds: log.length}` |
 | launch, and every return to foreground | `activity.reconcile {current id or null}`, then forced sync if a session exists and it is not spinning |
 
 ## 7. Acceptance checks

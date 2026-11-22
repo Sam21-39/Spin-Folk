@@ -10,6 +10,7 @@ import '../features/session/presentation/bloc/session_bloc.dart';
 import '../features/settings/presentation/cubit/settings_cubit.dart';
 import '../features/setup/presentation/cubit/setup_cubit.dart';
 import '../platform/announcer.dart';
+import '../platform/live_activity_sync.dart';
 import 'app_navigator.dart';
 import 'tokens.dart';
 
@@ -28,6 +29,7 @@ class SpinfolkApp extends StatelessWidget {
             getIt<SessionBloc>().add(const AppBackgrounded());
             unawaited(getIt<HistoryCubit>().purgeNow());
           },
+          onResume: () => getIt<LiveActivitySync>().foreground(),
         ),
         dispose: (listener) => listener.dispose(),
       ),

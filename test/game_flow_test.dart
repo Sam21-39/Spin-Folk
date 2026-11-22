@@ -12,6 +12,7 @@ import 'package:spinfolk/features/setup/presentation/cubit/setup_cubit.dart';
 import 'package:spinfolk/features/settings/domain/prefs.dart';
 import 'package:spinfolk/platform/adaptive_controls.dart';
 import 'package:spinfolk/platform/announcer.dart';
+import 'package:spinfolk/platform/native_bridge.dart';
 
 import 'support/harness.dart';
 
@@ -525,5 +526,62 @@ void main() {
       expect(prefsRepo.stored.announce, isFalse);
       expect(native.named('speech.stop'), isNotEmpty);
     });
+  });
+
+  testWidgets('Live Activity link resumes the game, not Home', (tester) async {
+    final id = 'ab' * 16;
+    final stored = Session(
+      id: id,
+      startedAtMs: 0,
+      players: [for (var i = 0; i < 4; i++) Player(seat: i)],
+    );
+    await pumpApp(tester, stored: stored);
+    expect(read<SessionBloc>(tester).state, isA<ResumePrompt>());
+    await native.send('url.open', {'sessionId': id});
+    await tester.pumpAndSettle();
+    expect(read<SessionBloc>(tester).state, isA<SessionActive>());
+    expect(find.text('Round 1 · 4 players'), findsOneWidget);
+  });
+
+  testWidgets('sheet line only when Live Activities are off', (tester) async {
+    const line = 'Lock Screen updates are off in iOS Settings.';
+    await pumpApp(tester, stored: storedSession(Phase.ready));
+    await tapBar(tester, 'resume');
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Session and settings'));
+    await tester.pumpAndSettle();
+    expect(find.text(line), findsNothing);
+    read<SettingsCubit>(tester).activityStatusChanged(ActivityStatus.disabled);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(line));
+    expect(find.text(line), findsOneWidget);
+    read<SettingsCubit>(tester)
+        .activityStatusChanged(ActivityStatus.unsupported);
+    await tester.pumpAndSettle();
+    expect(find.text(line), findsNothing);
+    expect(
+      find.text("Lock Screen updates aren't available on this device."),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('activity disabled via channel: line shows, loop unaffected', (
+    tester,
+  ) async {
+    const line = 'Lock Screen updates are off in iOS Settings.';
+    await pumpApp(tester, stored: storedSession(Phase.ready, n: 8));
+    native.activityState = 'disabled'; // pumpApp installs a fresh fake
+    await tapBar(tester, 'resume');
+    await tester.pumpAndSettle();
+    await spin(tester);
+    await tapBar(tester, 'truth');
+    await tapBar(tester, 'next');
+    await tester.pumpAndSettle();
+    expect(read<SessionBloc>(tester).state, isA<SessionActive>());
+    expect((read<SessionBloc>(tester).state as SessionActive).session.round, 2);
+    await tester.tap(find.bySemanticsLabel('Session and settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(line));
+    expect(find.text(line), findsOneWidget);
   });
 }

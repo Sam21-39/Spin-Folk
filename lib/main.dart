@@ -9,6 +9,7 @@ import 'core/di/injection.dart';
 import 'features/history/presentation/cubit/history_cubit.dart';
 import 'features/session/presentation/bloc/session_bloc.dart';
 import 'platform/announcer.dart';
+import 'platform/live_activity_sync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,7 @@ Future<void> bootstrap(Future<void> Function() init) async {
     await bloc.stream.firstWhere((s) => s is! SessionLoading);
   }
   getIt<Announcer>().start();
+  getIt<LiveActivitySync>().start(); // after the first state: real id
   unawaited(getIt<HistoryCubit>().load());
   runApp(const SpinfolkApp());
 }

@@ -7,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 class FakeNative {
   final List<MethodCall> calls = [];
   bool failSpeak = false;
+  String activityState = 'active';
+  bool failActivitySync = false;
+  Duration activityDelay = Duration.zero;
 
   /// Holds speech.speak replies until completed.
   Completer<void>? speakGate;
@@ -34,6 +37,16 @@ class FakeNative {
         return null;
       case 'speech.voices':
         return voices;
+      case 'activity.sync':
+        if (failActivitySync) throw PlatformException(code: 'activity');
+        if (activityDelay > Duration.zero) {
+          await Future<void>.delayed(activityDelay);
+        }
+        return {'state': activityState};
+      case 'activity.end':
+        return {'ok': true};
+      case 'activity.reconcile':
+        return {'ended': 0};
       default:
         return null;
     }
