@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/failure.dart';
+import '../../domain/entities/game_record.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/rules/labels.dart';
 import '../../domain/rules/selection.dart';
@@ -41,13 +42,15 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         emit,
         (a) => a.session.phase == Phase.revealed,
         (a) => a.session.chose(mode),
+        log: true,
       ),
       Passed() => _persist(
         emit,
         (a) =>
             a.session.phase == Phase.revealed ||
             a.session.phase == Phase.challenge,
-        (a) => a.session.nextRound(),
+        (a) => a.session.passed(),
+        log: true,
       ),
       NextRoundRequested() => _persist(
         emit,
@@ -60,6 +63,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         emit,
       ),
       EndConfirmed() => _end(emit),
+      SummaryDismissed() => _dismissSummary(emit),
       ReplayRequested() => _replay(emit),
     };
   }
@@ -102,11 +106,19 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     Emitter<SessionState> emit,
   ) async {
     final players = _players(count, names);
-    if (state is! NoSession || players == null) return;
+    final s = state;
+    if (players == null ||
+        !(s is NoSession || s is ResumePrompt || s is SessionSummary)) {
+      return;
+    }
     try {
       emit(SessionActive(session: await _repo.start(players)));
     } on Failure catch (f) {
-      emit(NoSession(notice: f.message));
+      emit(
+        s is ResumePrompt
+            ? ResumePrompt(s.session, failure: f)
+            : NoSession(notice: f.message),
+      );
     }
   }
 
@@ -162,16 +174,18 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   }
 
   /// ModeChosen / Passed / NextRoundRequested: persist the next session, then emit.
+  /// [log] also writes the round's log entry in the same transaction.
   Future<void> _persist(
     Emitter<SessionState> emit,
     bool Function(SessionActive) applies,
-    Session Function(SessionActive) transition,
-  ) async {
+    Session Function(SessionActive) transition, {
+    bool log = false,
+  }) async {
     final a = state;
     if (a is! SessionActive || a.spinning || !applies(a)) return;
     final next = transition(a);
     try {
-      await _repo.saveRound(next);
+      await _repo.saveRound(next, log: log ? next.log.last : null);
       emit(_with(a, next));
     } on Failure catch (f) {
       emit(_with(a, a.session, failure: f));
@@ -214,17 +228,17 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
 
   Future<void> _end(Emitter<SessionState> emit) async {
     final s = state;
-    if (s is! ResumePrompt && !(s is SessionActive && !s.spinning)) return;
+    if (s is! SessionActive || s.spinning) return;
     try {
-      await _repo.end();
-      emit(const NoSession());
+      final game = await _repo.end(s.session);
+      emit(game == null ? const NoSession() : SessionSummary(game));
     } on Failure catch (f) {
-      emit(switch (s) {
-        ResumePrompt() => ResumePrompt(s.session, failure: f),
-        SessionActive() => _with(s, s.session, failure: f),
-        _ => s,
-      });
+      emit(_with(s, s.session, failure: f));
     }
+  }
+
+  Future<void> _dismissSummary(Emitter<SessionState> emit) async {
+    if (state is SessionSummary) emit(const NoSession());
   }
 
   Future<void> _replay(Emitter<SessionState> emit) async {

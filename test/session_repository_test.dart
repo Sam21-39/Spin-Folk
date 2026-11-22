@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spinfolk/core/failure.dart';
+import 'package:spinfolk/features/history/data/history_repository_impl.dart';
 import 'package:spinfolk/features/session/data/session_db.dart';
 import 'package:spinfolk/features/session/data/session_repository_impl.dart';
 import 'package:spinfolk/features/session/domain/entities/session.dart';
@@ -30,11 +33,21 @@ void main() {
 
   test('schema, pragmas', () async {
     expect(Sqflite.firstIntValue(await db.rawQuery('PRAGMA foreign_keys')), 1);
-    expect(Sqflite.firstIntValue(await db.rawQuery('PRAGMA user_version')), 1);
+    expect(Sqflite.firstIntValue(await db.rawQuery('PRAGMA user_version')), 2);
     final t = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type = 'table'",
     );
-    expect(t.map((r) => r['name']), containsAll(['session', 'player']));
+    expect(
+      t.map((r) => r['name']),
+      containsAll([
+        'session',
+        'player',
+        'round_log',
+        'game',
+        'game_player',
+        'game_round',
+      ]),
+    );
   });
 
   test('load on empty is null', () async {
@@ -65,7 +78,7 @@ void main() {
     await repo.saveRound(s);
     expect(await repo.load(), s);
     s = s.chose(Mode.dare);
-    await repo.saveRound(s);
+    await repo.saveRound(s, log: s.log.last);
     expect(await repo.load(), s);
     s = s.nextRound();
     await repo.saveRound(s);
@@ -85,6 +98,24 @@ void main() {
     expect((await repo.load())!.phase, Phase.ready);
   });
 
+  test('saveRound with invalid log entry rolls back', () async {
+    final s = await repo.start(ps(8));
+    final next = s.revealed(const Outcome(taker: 1, giver: 5));
+    for (final bad in const [
+      RoundEntry(round: 1, taker: 2, giver: 2, result: RoundResult.truth),
+      RoundEntry(round: 0, taker: 1, giver: 5, result: RoundResult.truth),
+    ]) {
+      await expectLater(
+        repo.saveRound(next, log: bad),
+        throwsA(isA<StorageFailure>()),
+      );
+      final l = (await repo.load())!;
+      expect(l.phase, Phase.ready);
+      expect(l.round, 1);
+      expect(await count('round_log'), 0);
+    }
+  });
+
   test('replacePlayers', () async {
     final s = await repo.start(ps(8));
     await repo.replacePlayers(s.id, ps(5, {0: 'A'}));
@@ -101,11 +132,198 @@ void main() {
     );
   });
 
-  test('end cascades', () async {
-    await repo.start(ps(8));
-    await repo.end();
+  test('end without rounds cascades and archives nothing', () async {
+    final s = await repo.start(ps(8));
+    expect(await repo.end(s), isNull);
     expect(await count('session'), 0);
     expect(await count('player'), 0);
+    expect(await count('game'), 0);
+  });
+
+  /// Plays [rounds] logged rounds on a fresh session; returns it.
+  Future<Session> play(int rounds, {int n = 8}) async {
+    var s = await repo.start(ps(n, {1: 'Riya'}));
+    for (var i = 0; i < rounds; i++) {
+      s = s.revealed(const Outcome(taker: 1, giver: 5));
+      await repo.saveRound(s);
+      s = s.chose(i.isEven ? Mode.truth : Mode.dare);
+      await repo.saveRound(s, log: s.log.last);
+      s = s.nextRound();
+      await repo.saveRound(s);
+    }
+    return s;
+  }
+
+  group('round log', () {
+    test('saveRound with log writes a row; same round replaces it', () async {
+      var s = await repo.start(ps(8));
+      s = s.revealed(const Outcome(taker: 1, giver: 5)).chose(Mode.truth);
+      await repo.saveRound(s, log: s.log.last);
+      expect(await count('round_log'), 1);
+      expect(await repo.load(), s);
+      s = s.passed();
+      await repo.saveRound(s, log: s.log.last);
+      expect(await count('round_log'), 1);
+      final l = (await repo.load())!;
+      expect(l.log.single.result, RoundResult.pass);
+      expect(l, s);
+    });
+
+    test('unknown session id writes nothing', () async {
+      await repo.start(ps(3));
+      final s = Session(
+        id: 'nope',
+        startedAtMs: 0,
+        players: ps(3),
+      ).revealed(const Outcome(taker: 0, giver: 1)).chose(Mode.dare);
+      await expectLater(
+        repo.saveRound(s, log: s.log.last),
+        throwsA(isA<StorageFailure>()),
+      );
+      expect(await count('round_log'), 0);
+    });
+  });
+
+  group('archive', () {
+    test('end with rounds fills game tables, empties session', () async {
+      final s = await play(3);
+      final rec = (await repo.end(s))!;
+      expect(rec.rounds, hasLength(3));
+      expect(await count('session'), 0);
+      expect(await count('player'), 0);
+      expect(await count('round_log'), 0);
+      expect(await count('game'), 1);
+      expect(await count('game_player'), 8);
+      expect(await count('game_round'), 3);
+      final games = await HistoryRepositoryImpl(db).games();
+      expect(games.single, rec);
+      expect(games.single.players, s.players);
+      expect(games.single.rounds, s.log);
+      expect(rec.endedAtMs, greaterThanOrEqualTo(rec.startedAtMs));
+    });
+
+    test('start over a stored session with rounds archives it', () async {
+      final old = await play(2);
+      final fresh = await repo.start(ps(4));
+      expect(fresh.id, isNot(old.id));
+      expect(await count('game'), 1);
+      expect(await count('game_round'), 2);
+      expect(await count('round_log'), 0);
+      expect(await count('session'), 1);
+      expect((await repo.load())!.playerCount, 4);
+    });
+
+    test('start over a session without rounds archives nothing', () async {
+      await repo.start(ps(4));
+      await repo.start(ps(3));
+      expect(await count('game'), 0);
+    });
+  });
+
+  group('v2 CHECKs', () {
+    test('result, taker = giver, ended_at < started_at', () async {
+      final s = await repo.start(ps(8));
+      for (final row in [
+        {'round': 1, 'taker': 0, 'giver': 1, 'result': 'x'},
+        {'round': 1, 'taker': 2, 'giver': 2, 'result': 'pass'},
+      ]) {
+        await expectLater(
+          db.insert('round_log', {'session_id': s.id, ...row}),
+          throwsA(isA<DatabaseException>()),
+        );
+      }
+      await expectLater(
+        db.insert('game', {
+          'id': 'g',
+          'started_at': 10,
+          'ended_at': 9,
+          'player_count': 4,
+        }),
+        throwsA(isA<DatabaseException>()),
+      );
+    });
+  });
+
+  group('file database', () {
+    late Directory dir;
+    late String path;
+
+    setUp(() async {
+      dir = await Directory.systemTemp.createTemp('spinfolk_db');
+      addTearDown(() => dir.delete(recursive: true));
+      path = '${dir.path}/t.db';
+    });
+
+    test('v1 file migrates to v2 with data intact', () async {
+      final v1 = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 1,
+          onConfigure: (d) => d.execute('PRAGMA foreign_keys = ON'),
+          onCreate: (d, _) async {
+            for (final sql in sessionSchema) {
+              await d.execute(sql);
+            }
+          },
+        ),
+      );
+      await v1.insert('session', {
+        'id': 'old',
+        'started_at': 5,
+        'player_count': 3,
+        'round': 2,
+        'phase': 'ready',
+      });
+      for (var i = 0; i < 3; i++) {
+        await v1.insert('player', {
+          'session_id': 'old',
+          'seat': i,
+          'name': i == 0 ? 'Riya' : null,
+        });
+      }
+      await v1.close();
+
+      final v2 = await openSessionDb(factory: databaseFactoryFfi, path: path);
+      addTearDown(v2.close);
+      expect(
+        Sqflite.firstIntValue(await v2.rawQuery('PRAGMA user_version')),
+        2,
+      );
+      final t = await v2.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table'",
+      );
+      expect(
+        t.map((r) => r['name']),
+        containsAll(['round_log', 'game', 'game_player', 'game_round']),
+      );
+      final s = (await SessionRepositoryImpl(v2).load())!;
+      expect(s.id, 'old');
+      expect(s.round, 2);
+      expect(s.players, ps(3, {0: 'Riya'}));
+      expect(s.log, isEmpty);
+    });
+
+    test('soft-deleted games are purged at reopen', () async {
+      var d = await openSessionDb(factory: databaseFactoryFfi, path: path);
+      final r = SessionRepositoryImpl(d);
+      final h = HistoryRepositoryImpl(d);
+      var s = await r.start(ps(4));
+      s = s.revealed(const Outcome(taker: 0, giver: 2)).chose(Mode.truth);
+      await r.saveRound(s, log: s.log.last);
+      final rec = (await r.end(s))!;
+      await h.softDelete([rec.id], 1);
+      expect(await h.games(), isEmpty);
+      await d.close();
+      d = await openSessionDb(factory: databaseFactoryFfi, path: path);
+      addTearDown(d.close);
+      for (final t in ['game', 'game_player', 'game_round']) {
+        expect(
+          Sqflite.firstIntValue(await d.rawQuery('SELECT count(*) FROM $t')),
+          0,
+          reason: t,
+        );
+      }
+    });
   });
 
   group('schema refuses', () {

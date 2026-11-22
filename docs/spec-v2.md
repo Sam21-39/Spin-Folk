@@ -303,3 +303,16 @@ PHASES + GATES (after each: what works, checks run with real output, blockers, n
 README (short): FVM setup, pinned versions, codegen command, run/test commands, architecture map, iOS/signing prerequisites, gameplay, odd-player rule, known limits.
 
 STYLE: Small diffs. No speculative abstractions. One authoritative source per fact. Comment only non-obvious decisions. Don't stub a requested feature silently.
+
+---
+
+## Amendments — Phase 2b (2026-11-22)
+
+Owner added the "Flow v2 · History" design page and asked for `adaptive_platform_ui`. These override A1-12, A4, A6 `end()`, the A9 "deliberately not added: any glass package" line and the Part B route list. Details live in `docs/plans/phase-2b/prd.md` (single source):
+
+- **Glass rule** (prd §6.1): own `NativePicker` + `NativeActionBar` for the wheel and all bars; `adaptive_platform_ui` 1.0.2 `IOS26Button`, imported only via `lib/platform/glass_button.dart`, for chrome buttons. Package blur view, alert dialog, snackbar, scaffold and menus are banned. Cards stay solid. Never fake glass.
+- **Dependency:** `adaptive_platform_ui: 1.0.2` (SwiftPM).
+- **State/events** (prd §6.2): adds `SessionSummary(game)` state and `SummaryDismissed` event.
+- **Routes** (prd §6.3): `/` Home hub (replaces `/resume`), `/history`, `/history/clear`, `/history/:id`, `/history/:id/delete`, `/game/log`, `/summary`, plus existing setup/game routes.
+- **Schema v2** (prd §6.4): additive tables `round_log`, `game`, `game_player`, `game_round`; v1 tables unchanged.
+- End Session archives to History; a game with no logged round is not saved.

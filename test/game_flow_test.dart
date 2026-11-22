@@ -31,6 +31,8 @@ void main() {
     testWidgets('complete loop n=$n', (tester) async {
       final handle = tester.ensureSemantics();
       final repo = await pumpApp(tester);
+      await tapBar(tester, 'new');
+      await tester.pumpAndSettle();
       read<SetupCubit>(tester).countChanged(n);
       await tester.pump();
 
@@ -71,50 +73,138 @@ void main() {
       expect(find.textContaining('Round 4'), findsOneWidget);
       expect(repo.stored!.isValid, isTrue);
 
+      // Round log reflects Truth, Pass, Dare+Pass.
+      await tapLabel(tester, 'Round 4 · $n players');
+      await tester.pumpAndSettle();
+      expect(find.text('Round log'), findsOneWidget);
+      expect(find.text('3 rounds · 1 Truth · 0 Dare · 2 pass'), findsOneWidget);
+      await tapLabel(tester, 'Done');
+      await tester.pumpAndSettle();
+
       await tester.tap(find.bySemanticsLabel('Session and settings'));
       await tester.pumpAndSettle();
       expect(find.text('Edit Players'), findsOneWidget);
       await tester.tap(find.text('End Session'));
       await tester.pumpAndSettle();
       expect(find.text('End this session?'), findsOneWidget);
-      await tapBar(tester, 'end');
+      await tapBar(tester, 'confirm');
       await tester.pumpAndSettle();
-      expect(find.text('New Game'), findsOneWidget);
+      expect(find.text('Good game.'), findsOneWidget);
+      expect(find.textContaining('3 rounds · $n players'), findsOneWidget);
       expect(repo.stored, isNull);
+      expect(historyRepo().rows, hasLength(1));
+      await tapBar(tester, 'done');
+      await tester.pumpAndSettle();
+      expect(find.text('Recent'), findsOneWidget);
+      expect(find.textContaining('$n players · 3 rounds'), findsOneWidget);
       handle.dispose();
     });
   }
 
-  testWidgets('End from Resume asks first; Cancel returns', (tester) async {
-    final repo = await pumpApp(tester, stored: storedSession(Phase.ready));
-    expect(find.text('SESSION IN PROGRESS'), findsOneWidget);
-    await tapBar(tester, 'end');
+  testWidgets('Resume from Home continues the stored game', (tester) async {
+    await pumpApp(tester, stored: storedSession(Phase.ready));
+    expect(find.textContaining('IN PROGRESS'), findsOneWidget);
+    expect(find.textContaining('Starting a new game ends'), findsOneWidget);
+    await tapBar(tester, 'resume');
     await tester.pumpAndSettle();
-    expect(find.text('End this session?'), findsOneWidget);
-    await tapBar(tester, 'cancel');
-    await tester.pumpAndSettle();
-    expect(find.text('SESSION IN PROGRESS'), findsOneWidget);
-    await tapBar(tester, 'end');
-    await tester.pumpAndSettle();
-    await tapBar(tester, 'end');
-    await tester.pumpAndSettle();
-    expect(find.text('New Game'), findsOneWidget);
-    expect(repo.stored, isNull);
+    expect(find.text('Round 1 · 8 players'), findsOneWidget);
   });
 
-  testWidgets('End from Resume: barrier tap returns to Resume', (tester) async {
-    await pumpApp(tester, stored: storedSession(Phase.ready));
-    await tapBar(tester, 'end');
+  testWidgets('New game over an in-progress game archives it', (tester) async {
+    final stored = storedSession(Phase.challenge);
+    final repo = await pumpApp(
+      tester,
+      stored: Session(
+        id: stored.id,
+        startedAtMs: 0,
+        players: stored.players,
+        phase: Phase.challenge,
+        outcome: stored.outcome,
+        mode: Mode.truth,
+        log: const [
+          RoundEntry(round: 1, taker: 0, giver: 4, result: RoundResult.truth),
+        ],
+      ),
+    );
+    await tapBar(tester, 'new');
     await tester.pumpAndSettle();
-    expect(find.text('End this session?'), findsOneWidget);
-    await tester.tapAt(const Offset(195, 20));
+    await tapBar(tester, 'start');
     await tester.pumpAndSettle();
-    expect(find.text('SESSION IN PROGRESS'), findsOneWidget);
-    expect(find.text('End this session?'), findsNothing);
+    expect(find.text('Round 1 · 8 players'), findsOneWidget);
+    expect(historyRepo().rows, hasLength(1));
+    expect(repo.stored!.id, isNot('test'));
+  });
+
+  testWidgets('quick-count chip sets the count', (tester) async {
+    await pumpApp(tester);
+    await tapBar(tester, 'new');
+    await tester.pumpAndSettle();
+    await tapBar(tester, 'count:6');
+    expect(read<SetupCubit>(tester).state.count, 6);
+    await tapBar(tester, 'count:12');
+    expect(read<SetupCubit>(tester).state.count, 12);
+  });
+
+  testWidgets('round log: pill and LAST card, Truth/Dare/Pass', (tester) async {
+    await pumpApp(tester, stored: storedSession(Phase.ready, n: 8));
+    await tapBar(tester, 'resume');
+    await tester.pumpAndSettle();
+    expect(find.text('LAST'), findsNothing); // legend while the log is empty
+    await spin(tester);
+    await tapBar(tester, 'truth');
+    await tapBar(tester, 'next');
+    await spin(tester);
+    await tapBar(tester, 'pass'); // revealed -> pass
+    await tester.pumpAndSettle();
+    await spin(tester);
+    await tapBar(tester, 'dare');
+    await tapBar(tester, 'pass'); // dare then pass overwrites
+    await tester.pumpAndSettle();
+    expect(find.text('LAST'), findsOneWidget);
+    expect(find.text('Passed · no penalty'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Round log'));
+    await tester.pumpAndSettle();
+    expect(find.text('Round log'), findsOneWidget);
+    expect(find.text('3 rounds · 1 Truth · 0 Dare · 2 pass'), findsOneWidget);
+    expect(find.text('Passed · no penalty'), findsNWidgets(3)); // 2 + LAST
+    await tapLabel(tester, 'Done');
+    await tester.pumpAndSettle();
+    expect(find.text('Round log'), findsNothing);
+  });
+
+  testWidgets('Play again · same players starts round 1 with the names', (
+    tester,
+  ) async {
+    final repo = await pumpApp(tester);
+    await tapBar(tester, 'new');
+    await tester.pumpAndSettle();
+    read<SetupCubit>(tester)
+      ..countChanged(4)
+      ..namesOpened()
+      ..draftChanged(1, 'Riya')
+      ..namesSaved();
+    await tester.pump();
+    await tapBar(tester, 'start');
+    await tester.pumpAndSettle();
+    await spin(tester);
+    await tapBar(tester, 'truth');
+    read<AppNavigator>(tester).confirmEnd();
+    await tester.pumpAndSettle();
+    await tapBar(tester, 'confirm');
+    await tester.pumpAndSettle();
+    expect(find.text('Good game.'), findsOneWidget);
+    expect(find.textContaining('Riya'), findsNothing); // only one round
+    await tapBar(tester, 'again');
+    await tester.pumpAndSettle();
+    expect(find.text('Round 1 · 4 players'), findsOneWidget);
+    expect(repo.stored!.players[1].name, 'Riya');
+    expect(historyRepo().rows, hasLength(1));
   });
 
   testWidgets('failed start keeps names', (tester) async {
     final repo = await pumpApp(tester);
+    await tapBar(tester, 'new');
+    await tester.pumpAndSettle();
     read<SetupCubit>(tester)
       ..namesOpened()
       ..draftChanged(0, 'Riya')
@@ -124,7 +214,7 @@ void main() {
     await tapBar(tester, 'start');
     await tester.pumpAndSettle();
     expect(read<SetupCubit>(tester).state.names, {0: 'Riya'});
-    expect(find.text('New Game'), findsOneWidget);
+    expect(find.text('New game'), findsOneWidget);
   });
 
   testWidgets('Spin to Reveal: no ghost of the waiting panel', (tester) async {
@@ -184,7 +274,7 @@ void main() {
     await tester.tap(find.text('Edit Players'));
     await tester.pumpAndSettle();
     expect(find.text('Edit Players'), findsOneWidget); // page title
-    expect(find.text('New Game'), findsNothing);
+    expect(find.text('New game'), findsNothing);
     read<SetupCubit>(tester).countChanged(5);
     await tester.pump();
     await tapBar(tester, 'save');
@@ -206,15 +296,18 @@ void main() {
 
   testWidgets('names flow', (tester) async {
     await pumpApp(tester);
-    expect(find.textContaining('Add Names'), findsOneWidget);
-    await tester.tap(find.textContaining('Add Names'));
+    await tapBar(tester, 'new');
+    await tester.pumpAndSettle();
+    expect(find.text('Add names'), findsOneWidget);
+    await tester.tap(find.text('Add names'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, 'Riya');
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    expect(find.text('Edit Names · 1 named'), findsOneWidget);
+    expect(find.text('Edit names'), findsOneWidget);
+    expect(find.text('1 named'), findsOneWidget);
 
-    await tester.tap(find.textContaining('Edit Names'));
+    await tester.tap(find.text('Edit names'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, 'Changed');
     await tester.tap(find.text('Cancel'));
@@ -236,21 +329,26 @@ void main() {
     repo.failWrites = false;
   });
 
-  testWidgets('after End, New Game shows no names', (tester) async {
+  testWidgets('after End, New game shows no names', (tester) async {
     await pumpApp(tester);
+    await tapBar(tester, 'new');
+    await tester.pumpAndSettle();
     read<SetupCubit>(tester)
       ..namesOpened()
       ..draftChanged(0, 'Riya')
       ..namesSaved();
     await tester.pumpAndSettle();
-    expect(find.textContaining('Edit Names'), findsOneWidget);
+    expect(find.text('Edit names'), findsOneWidget);
     await tapBar(tester, 'start');
     await tester.pumpAndSettle();
     read<AppNavigator>(tester).confirmEnd();
     await tester.pumpAndSettle();
-    await tapBar(tester, 'end');
+    await tapBar(tester, 'confirm'); // no rounds: nothing saved, Home
     await tester.pumpAndSettle();
-    expect(find.text('New Game'), findsOneWidget);
-    expect(find.textContaining('Add Names'), findsOneWidget);
+    expect(historyRepo().rows, isEmpty);
+    await tapBar(tester, 'new');
+    await tester.pumpAndSettle();
+    expect(find.text('New game'), findsOneWidget);
+    expect(find.text('Add names'), findsOneWidget);
   });
 }

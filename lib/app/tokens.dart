@@ -33,6 +33,8 @@ abstract final class Tokens {
   static const Duration panelEnter = Duration(milliseconds: 320);
   static const Duration reducedSpin = Duration(milliseconds: 600);
   static const Duration pulse = Duration(milliseconds: 1200);
+  static const Duration snapBack = Duration(milliseconds: 180);
+  static const Duration rowCollapse = Duration(milliseconds: 250);
   static const Cubic spinCurve = Cubic(0.15, 0.60, 0.10, 1.00);
 
   static const double touch = 44;
@@ -40,8 +42,14 @@ abstract final class Tokens {
   static const double barSecondary = 50;
   static const double barGap = 10;
   static const double passWidth = 104;
+  static const double barProminent = 60;
+  static const double barHub = 54;
+  static const double chip = 44;
   static const double pickerHeight = 216;
   static const double maxContentWidth = 480;
+
+  /// rad/s; a release slower than this snaps back instead of spinning.
+  static const double flickMinSpeed = 3.0;
 
   static const TextStyle largeTitle = TextStyle(
     color: textPrimary,

@@ -31,10 +31,12 @@ class DialPainter extends CustomPainter {
     this.plan, // non-null only while spinning
     this.outcome, // non-null only when revealed AND not spinning
     this.reduceMotion = false,
-  }) : super(repaint: Listenable.merge([spin, pulse]));
+    this.drag =
+        kAlwaysDismissedAnimation, // finger offset from the plan's start
+  }) : super(repaint: Listenable.merge([spin, pulse, drag]));
 
   final int n;
-  final Animation<double> spin, pulse;
+  final Animation<double> spin, pulse, drag;
   final double orientation;
   final SpinPlan? plan;
   final Outcome? outcome;
@@ -145,15 +147,22 @@ class DialPainter extends CustomPainter {
 
     // 5. bottle
     final p = plan;
-    if (p != null && reduceMotion) {
-      _bottle(canvas, c, s, p.start, 1 - spin.value);
-      _bottle(canvas, c, s, p.end, spin.value);
+    if (p != null) {
+      final start = p.start + drag.value; // ends exactly at p.end
+      if (reduceMotion) {
+        _bottle(canvas, c, s, start, 1 - spin.value);
+        _bottle(canvas, c, s, p.end, spin.value);
+      } else {
+        _bottle(
+          canvas,
+          c,
+          s,
+          start + (p.end - start) * Tokens.spinCurve.transform(spin.value),
+          1,
+        );
+      }
     } else {
-      final angle = p == null
-          ? orientation
-          : p.start +
-                (p.end - p.start) * Tokens.spinCurve.transform(spin.value);
-      _bottle(canvas, c, s, angle, 1);
+      _bottle(canvas, c, s, orientation + drag.value, 1);
     }
 
     // 6. pin

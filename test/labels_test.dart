@@ -109,4 +109,15 @@ void main() {
     );
     expect(bad.isValid, isFalse);
   });
+
+  test('playerAt falls back to an unnamed player', () {
+    final ps = [const Player(seat: 0, name: 'A'), const Player(seat: 1)];
+    expect(playerAt(ps, 0), ps[0]);
+    expect(playerAt(ps, 5), const Player(seat: 5));
+  });
+
+  test('shortLabel', () {
+    expect(shortLabel(const Player(seat: 2)), 'P3');
+    expect(shortLabel(const Player(seat: 1, name: 'Kabir')), 'Kabir · P2');
+  });
 }

@@ -17,6 +17,26 @@ src -l 'extends StatefulWidget' lib/ \
   | grep -v -e '^lib/features/game/presentation/widgets/spin_stage.dart$' \
   && bad 'StatefulWidget outside the allowlist'
 
+src -l "package:adaptive_platform_ui" lib/ | grep -v '^lib/platform/' \
+  && bad 'adaptive_platform_ui may only be imported under lib/platform/'
+src 'Adaptive(App|Scaffold|AlertDialog|SnackBar|BlurView|Button|PopupMenuButton|ContextMenu|Card)\b|Ios26NativeBlurView|IOS26AlertDialog' lib/ \
+  && bad 'only IOS26Button (and, from Phase 3, AdaptiveSwitch/AdaptiveSlider) may be used from adaptive_platform_ui'
+
+# lib/platform imports adaptive_platform_ui only with an allow-listed `show`.
+allow='IOS26Button|IOS26ButtonStyle|SFSymbol|AdaptiveSwitch|AdaptiveSlider'
+while IFS= read -r f; do
+  # one line per whole import/export statement (up to the `;`)
+  while IFS= read -r imp; do
+    case "$imp" in
+      *" show "*) ;;
+      *) bad "$f: adaptive_platform_ui import needs a show list"; continue ;;
+    esac
+    for n in $(echo "$imp" | sed -E 's/.* show //; s/;.*//' | tr ',' ' '); do
+      echo "$n" | grep -qE "^($allow)$" || bad "$f: $n not on the adaptive_platform_ui allow-list"
+    done
+  done < <(awk '/^(import|export) .package:adaptive_platform_ui/{p=1} p{printf "%s ", $0} p&&/;/{p=0; print ""}' "$f")
+done < <(grep -rlE --include='*.dart' "^(import|export) .package:adaptive_platform_ui" lib/platform 2>/dev/null)
+
 layers=$(find lib/features -type d \( -name domain -o -name data -o -name bloc -o -name cubit \) 2>/dev/null)
 [ -n "$layers" ] && src 'BuildContext' $layers && bad 'BuildContext in domain/data/bloc/cubit'
 

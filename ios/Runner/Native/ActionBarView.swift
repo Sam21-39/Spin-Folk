@@ -23,7 +23,7 @@ final class ActionBarModel {
               let id = m["id"] as? String,
               let label = m["label"] as? String else { return nil }
         let style = m["style"] as? String ?? "secondary"
-        let known = ["primary", "secondary", "destructive", "choice"]
+        let known = ["primary", "secondary", "destructive", "choice", "prominent", "chip", "chipOn"]
         return ActionItem(
           id: id, label: label,
           style: known.contains(style) ? style : "secondary",
@@ -38,6 +38,7 @@ final class ActionBarModel {
 }
 
 private let coral = Color(red: 1.0, green: 0x7A / 255, blue: 0x59 / 255)
+private let navy = Color(red: 0x0B / 255, green: 0x14 / 255, blue: 0x24 / 255)
 
 struct ActionBarIsland: View {
   let model: ActionBarModel
@@ -68,21 +69,38 @@ struct ActionBarIsland: View {
 
   @ViewBuilder
   private func button(_ item: ActionItem) -> some View {
+    // v2 styles fill the rect Flutter gives; v1 styles keep their minimum heights.
+    let fills = ["prominent", "chip", "chipOn"].contains(item.style)
+    // White capsule, navy label.
+    let light = item.style == "prominent" || item.style == "chipOn"
+    let isChip = item.style == "chip" || item.style == "chipOn"
     let b = Button { model.onTap?(item.id) } label: {
       Text(item.label)
         .font(.headline)
-        .frame(maxWidth: .infinity, minHeight: item.style == "primary" ? 64 : 50)
+        .fontWeight(isChip ? .heavy : nil)
+        .frame(
+          maxWidth: .infinity,
+          minHeight: item.style == "primary" ? 64 : (fills ? 44 : 50),
+          maxHeight: fills ? .infinity : nil)
     }
     .disabled(!item.enabled)
     .buttonBorderShape(.capsule)
-    .foregroundStyle(item.style == "destructive" ? coral : Color.white)
+    .foregroundStyle(item.style == "destructive" ? coral : (light ? navy : Color.white))
+    .accessibilityLabel(isChip ? "\(item.label) players" : item.label)
+    .accessibilityAddTraits(item.style == "chipOn" ? .isSelected : [])
 
     if #available(iOS 26.0, *) {
       if item.style == "primary" {
         b.buttonStyle(.glassProminent).tint(.white.opacity(0.2))
+      } else if light {
+        b.buttonStyle(.glassProminent).tint(.white.opacity(0.92))
       } else {
         b.buttonStyle(.glass)
       }
+    } else if light {
+      b.buttonStyle(.plain)
+        .background(Color.white.opacity(0.92), in: Capsule())
+        .contentShape(Capsule())
     } else {
       b.buttonStyle(.plain)
         .background(.ultraThinMaterial, in: Capsule())

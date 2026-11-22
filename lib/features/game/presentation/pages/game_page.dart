@@ -1,14 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../app/app_navigator.dart';
 import '../../../../app/tokens.dart';
 import '../../../../app/ui.dart';
+import '../../../../platform/glass_button.dart';
 import '../../../../platform/native_action_bar.dart';
 import '../../../session/domain/entities/session.dart';
+import '../../../history/domain/rules/history_labels.dart';
 import '../../../session/domain/rules/labels.dart';
 import '../../../session/presentation/bloc/session_bloc.dart';
 import '../widgets/role_cards.dart';
@@ -23,19 +24,11 @@ class GamePage extends StatelessWidget {
     body: BlocBuilder<SessionBloc, SessionState>(
       builder: (context, st) {
         if (st is! SessionActive) return const SizedBox.shrink();
-        // D12 fallback, kept on purpose: the simulator showed native bars
-        // painting over the sheet scrim, so bars drop while an overlay is up.
-        final router = GoRouter.of(context);
-        return ListenableBuilder(
-          listenable: router.routerDelegate,
-          builder: (context, _) => PageFrame(
-            child: _Game(
-              st,
-              covered:
-                  router.routerDelegate.currentConfiguration.uri.path !=
-                  '/game',
-            ),
-          ),
+        // Only the top route shows native views (D13).
+        return TopRoute(
+          path: '/game',
+          builder: (context, covered) =>
+              PageFrame(child: _Game(st, covered: covered)),
         );
       },
     ),
@@ -161,10 +154,14 @@ class _Game extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(
-                child: _Pill(round: session.round, n: session.playerCount),
+                child: _Pill(
+                  round: session.round,
+                  n: session.playerCount,
+                  covered: covered,
+                ),
               ),
               const SizedBox(width: Tokens.s12),
-              const _SettingsButton(),
+              _SettingsButton(covered: covered),
             ],
           ),
         ),
@@ -258,7 +255,7 @@ class _Game extends StatelessWidget {
   Widget _panel(BuildContext context) {
     final o = session.outcome;
     final Widget body;
-    if (st.spinning || o == null) {
+    if (st.spinning) {
       body = Container(
         constraints: const BoxConstraints(minHeight: 94),
         alignment: Alignment.center,
@@ -266,13 +263,13 @@ class _Game extends StatelessWidget {
           border: Border.all(color: Tokens.line),
           borderRadius: BorderRadius.circular(Tokens.r20),
         ),
-        child: st.spinning
-            ? const Text(
-                'Waiting for the bottle…',
-                style: TextStyle(color: Tokens.textTertiary, fontSize: 15),
-              )
-            : _legend(),
+        child: const Text(
+          'Waiting for the bottle…',
+          style: TextStyle(color: Tokens.textTertiary, fontSize: 15),
+        ),
       );
+    } else if (o == null) {
+      body = _ready(context);
     } else if (session.phase == Phase.revealed) {
       body = Column(
         children: [
@@ -311,6 +308,116 @@ class _Game extends StatelessWidget {
       height: 19 / 14,
     ),
   );
+
+  /// Ready panel: flick hint, then the "LAST" card (or the legend, no rounds).
+  Widget _ready(BuildContext context) {
+    final last = session.log.isEmpty ? null : session.log.last;
+    return Column(
+      children: [
+        const Text(
+          'Flick the bottle, or tap Spin.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Tokens.textSecondary, fontSize: 15),
+        ),
+        const SizedBox(height: Tokens.s12),
+        if (last == null)
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Tokens.line),
+              borderRadius: BorderRadius.circular(Tokens.r20),
+            ),
+            child: _legend(),
+          )
+        else
+          _lastCard(context, last),
+      ],
+    );
+  }
+
+  Widget _lastCard(BuildContext context, RoundEntry e) {
+    final pass = e.result == RoundResult.pass;
+    final giver = shortLabel(playerAt(session.players, e.giver));
+    final taker = shortLabel(playerAt(session.players, e.taker));
+    return Semantics(
+      button: true,
+      label: 'Round log',
+      excludeSemantics: true,
+      onTap: context.read<AppNavigator>().roundLog,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: context.read<AppNavigator>().roundLog,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Tokens.bgSurface,
+            border: Border.all(color: Tokens.line),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LAST',
+                      style: Tokens.caption.copyWith(
+                        color: Tokens.textTertiary,
+                      ),
+                    ),
+                    const SizedBox(height: Tokens.s4),
+                    if (pass)
+                      Text(
+                        resultLabel(e.result),
+                        style: const TextStyle(
+                          color: Tokens.textTertiary,
+                          fontSize: 15,
+                        ),
+                      )
+                    else
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: giver,
+                              style: const TextStyle(color: Tokens.giver),
+                            ),
+                            const TextSpan(text: ' → '),
+                            TextSpan(
+                              text: taker,
+                              style: const TextStyle(color: Tokens.taker),
+                            ),
+                            TextSpan(text: ' · ${resultLabel(e.result)}'),
+                          ],
+                          style: const TextStyle(
+                            color: Tokens.textPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Tokens.s8),
+              Text(
+                'Round log ›',
+                style: const TextStyle(
+                  color: Tokens.textTertiary,
+                  fontSize: 14,
+                ),
+                textScaler: besideIsland(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _legend() {
     Widget row(Color c, String bold, String rest) => Row(
@@ -409,83 +516,74 @@ class _Game extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({required this.round, required this.n});
+  const _Pill({required this.round, required this.n, required this.covered});
   final int round, n;
+  final bool covered;
 
   @override
-  Widget build(BuildContext context) => Semantics(
+  Widget build(BuildContext context) => GlassButton(
     label: 'Round $round · $n players',
-    excludeSemantics: true,
-    child: Container(
-      constraints: const BoxConstraints(minHeight: Tokens.touch),
-      padding: const EdgeInsets.symmetric(horizontal: Tokens.s16),
-      decoration: ShapeDecoration(
-        color: Tokens.bgRaised,
-        shape: StadiumBorder(side: BorderSide(color: Tokens.line)),
-      ),
-      child: Center(
-        widthFactor: 1,
-        child: Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: 'Round $round',
-                style: const TextStyle(
-                  color: Tokens.textPrimary,
-                  fontWeight: FontWeight.w600,
+    flat: covered,
+    onPressed: context.read<AppNavigator>().roundLog,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Round $round',
+                  style: const TextStyle(
+                    color: Tokens.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const TextSpan(text: ' · '),
-              TextSpan(text: '$n players'),
-            ],
-            style: const TextStyle(color: Tokens.textSecondary, fontSize: 15),
+                const TextSpan(text: ' · '),
+                TextSpan(text: '$n players'),
+              ],
+              style: const TextStyle(color: Tokens.textSecondary, fontSize: 15),
+            ),
+            maxLines: 1,
+            textScaler: besideIsland(context),
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          textScaler: besideIsland(context),
-          overflow: TextOverflow.ellipsis,
         ),
-      ),
+        const SizedBox(width: 6),
+        const Text(
+          '›',
+          style: TextStyle(color: Tokens.textTertiary, fontSize: 15),
+        ),
+      ],
     ),
   );
 }
 
 class _SettingsButton extends StatelessWidget {
-  const _SettingsButton();
+  const _SettingsButton({required this.covered});
+  final bool covered;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
+  Widget build(BuildContext context) => GlassButton(
     label: 'Session and settings',
-    excludeSemantics: true,
-    child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: context.read<AppNavigator>().settings,
-      child: Container(
-        width: Tokens.touch,
-        height: Tokens.touch,
-        decoration: BoxDecoration(
-          color: Tokens.bgRaised,
-          shape: BoxShape.circle,
-          border: Border.all(color: Tokens.line),
-        ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < 3; i++) ...[
-              if (i > 0) const SizedBox(width: 3),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: Tokens.textPrimary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+    symbol: 'ellipsis',
+    flat: covered,
+    onPressed: context.read<AppNavigator>().settings,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < 3; i++) ...[
+          if (i > 0) const SizedBox(width: 3),
+          Container(
+            width: 4,
+            height: 4,
+            decoration: const BoxDecoration(
+              color: Tokens.textPrimary,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ],
     ),
   );
 }
